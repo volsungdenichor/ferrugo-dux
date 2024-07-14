@@ -70,3 +70,23 @@ TEST_CASE("drop", "[transducers]")
         dux::into(std::vector<int>{}, xform, in),
         matchers::elements_are(7, 9, 11, 12, 13, 14));
 }
+
+TEST_CASE("take_while", "[transducers]")
+{
+    const auto xform = dux::take_while([](int x) { return x < 10; });
+    const std::vector<int> in = { 2, 3, 5, 7, 9, 11, 12, 13, 14 };
+
+    REQUIRE_THAT(  //
+        dux::into(std::vector<int>{}, xform, in),
+        matchers::elements_are(2, 3, 5, 7, 9));
+}
+
+TEST_CASE("drop_while", "[transducers]")
+{
+    const auto xform = dux::drop_while([](int x) { return x < 10; });
+    const std::vector<int> in = { 2, 3, 5, 7, 9, 11, 12, 13, 14 };
+
+    REQUIRE_THAT(  //
+        dux::into(std::vector<int>{}, xform, in),
+        matchers::elements_are(11, 12, 13, 14));
+}
