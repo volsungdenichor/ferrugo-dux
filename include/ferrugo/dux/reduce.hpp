@@ -89,5 +89,11 @@ using detail::into;
 using detail::reduce;
 using detail::transduce;
 
+template <class T, class Transducer, class... Ranges>
+auto to_vector(Transducer&& transducer, Ranges&&... ranges) -> std::vector<T>
+{
+    return into(std::vector<T>{}, std::forward<Transducer>(transducer), std::forward<Ranges>(ranges)...);
+}
+
 }  // namespace dux
 }  // namespace ferrugo

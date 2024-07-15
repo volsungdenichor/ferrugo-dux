@@ -3,10 +3,21 @@
 
 #include "matchers.hpp"
 
+namespace
+{
+std::string uppercase(std::string text)
+{
+    std::transform(text.begin(), text.end(), text.begin(), [](char ch) { return std::toupper(ch); });
+    return text;
+}
+}  // namespace
+
 using namespace ferrugo;
 
 struct delimit_fn
 {
+    std::string m_delimiter;
+
     template <class T>
     auto operator()(std::string total, const T& item) const -> std::string
     {
@@ -17,11 +28,11 @@ struct delimit_fn
                 ss << item;
                 return ss.str();
             });
-        return total.empty() ? v : total + ", " + v;
+        return total.empty() ? v : total + m_delimiter + v;
     }
 };
 
-static constexpr inline auto delimit = delimit_fn{};
+static const inline auto delimit = delimit_fn{ ", " };
 
 TEST_CASE("transform", "[transducers]")
 {
@@ -43,7 +54,7 @@ TEST_CASE("filter", "[transducers]")
     const std::vector<int> in = { 2, 3, 5, 7, 9, 11, 12, 13, 14 };
 
     REQUIRE_THAT(  //
-        dux::into(std::vector<int>{}, xform, in),
+        dux::to_vector<int>(xform, in),
         matchers::elements_are(2, 12, 14));
 
     REQUIRE_THAT(  //
@@ -57,7 +68,7 @@ TEST_CASE("take", "[transducers]")
     const std::vector<int> in = { 2, 3, 5, 7, 9, 11, 12, 13, 14 };
 
     REQUIRE_THAT(  //
-        dux::into(std::vector<int>{}, xform, in),
+        dux::to_vector<int>(xform, in),
         matchers::elements_are(2, 3, 5));
 }
 
@@ -67,7 +78,7 @@ TEST_CASE("drop", "[transducers]")
     const std::vector<int> in = { 2, 3, 5, 7, 9, 11, 12, 13, 14 };
 
     REQUIRE_THAT(  //
-        dux::into(std::vector<int>{}, xform, in),
+        dux::to_vector<int>(xform, in),
         matchers::elements_are(7, 9, 11, 12, 13, 14));
 }
 
@@ -77,7 +88,7 @@ TEST_CASE("take_while", "[transducers]")
     const std::vector<int> in = { 2, 3, 5, 7, 9, 11, 12, 13, 14 };
 
     REQUIRE_THAT(  //
-        dux::into(std::vector<int>{}, xform, in),
+        dux::to_vector<int>(xform, in),
         matchers::elements_are(2, 3, 5, 7, 9));
 }
 
@@ -87,6 +98,27 @@ TEST_CASE("drop_while", "[transducers]")
     const std::vector<int> in = { 2, 3, 5, 7, 9, 11, 12, 13, 14 };
 
     REQUIRE_THAT(  //
-        dux::into(std::vector<int>{}, xform, in),
+        dux::to_vector<int>(xform, in),
         matchers::elements_are(11, 12, 13, 14));
+}
+
+TEST_CASE("join", "[transducers]")
+{
+    const auto xform = dux::join;
+    const std::vector<std::string> in = { "Alpha", "Beta", "Gamma" };
+
+    REQUIRE_THAT(  //
+        dux::into(std::string{}, xform, in),
+        matchers::equal_to("AlphaBetaGamma"));
+}
+
+TEST_CASE("join_with", "[transducers]")
+{
+    using namespace std::string_view_literals;
+    const auto xform = dux::join_with(", "sv);
+    const std::vector<std::string> in = { "Alpha", "Beta", "Gamma" };
+
+    REQUIRE_THAT(  //
+        dux::into(std::string{}, xform, in),
+        matchers::equal_to("Alpha, Beta, Gamma"));
 }
