@@ -8,7 +8,7 @@ namespace dux
 {
 namespace detail
 {
-struct transform_fn
+struct inspect_fn
 {
     template <class Next, class Func>
     struct reducer_t
@@ -19,7 +19,8 @@ struct transform_fn
         template <class State, class... Args>
         auto operator()(State state, Args&&... args) const -> State
         {
-            return m_next(std::move(state), std::invoke(m_func, std::forward<Args>(args)...));
+            std::invoke(m_func, args...);
+            return m_next(std::move(state), std::forward<Args>(args)...);
         }
     };
 
@@ -44,6 +45,6 @@ struct transform_fn
 
 }  // namespace detail
 
-static constexpr inline auto transform = detail::transform_fn{};
+static constexpr inline auto inspect = detail::inspect_fn{};
 }  // namespace dux
 }  // namespace ferrugo

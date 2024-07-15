@@ -49,6 +49,20 @@ TEST_CASE("transform", "[transducers]")
         matchers::equal_to("2, 3, 5, 7, 9, 11"));
 }
 
+TEST_CASE("transform_i", "[transducers]")
+{
+    const auto xform = dux::transform_i([](int i, int x) { return std::to_string(i) + ". " + std::to_string(x); });
+    const std::vector<int> in = { 2, 3, 5, 7, 9, 11 };
+
+    REQUIRE_THAT(  //
+        dux::into(std::vector<std::string>{}, xform, in),
+        matchers::elements_are("0. 2", "1. 3", "2. 5", "3. 7", "4. 9", "5. 11"));
+
+    REQUIRE_THAT(  //
+        dux::transduce(xform, delimit, std::string{}, in),
+        matchers::equal_to("0. 2, 1. 3, 2. 5, 3. 7, 4. 9, 5. 11"));
+}
+
 TEST_CASE("filter", "[transducers]")
 {
     const auto xform = dux::filter([](int x) { return x % 2 == 0; });
@@ -139,11 +153,9 @@ TEST_CASE("transform_maybe", "[transducers]")
     const auto xform = dux::transform_maybe(
         [](int x) -> std::optional<std::string>
         {
-            if (x % 2 == 0)
-            {
-                return std::to_string(x);
-            }
-            return {};
+            return x % 2 == 0  //
+                       ? std::optional<std::string>{ std::to_string(x) }
+                       : std::optional<std::string>{};
         });
     const std::vector<int> in = { 1, 2, 3, 4, 5, 6 };
 
