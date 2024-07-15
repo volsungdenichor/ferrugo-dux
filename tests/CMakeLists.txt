@@ -1,7 +1,7 @@
 set(TARGET_NAME ferrugo-dux-tests)
 
 set(UNIT_TEST_SOURCE_LIST
-    seq.test.cpp
+    dux.test.cpp
 )
 
 Include(FetchContent)

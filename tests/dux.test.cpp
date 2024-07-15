@@ -97,6 +97,16 @@ TEST_CASE("drop", "[transducers]")
         matchers::elements_are(7, 9, 11, 12, 13, 14));
 }
 
+TEST_CASE("stride", "[transducers]")
+{
+    const auto xform = dux::stride(3);
+    const std::vector<int> in = { 2, 3, 5, 7, 9, 11, 12, 13, 14 };
+
+    REQUIRE_THAT(  //
+        dux::to_vector<int>(xform, in),
+        matchers::elements_are(2, 7, 12));
+}
+
 TEST_CASE("take_while", "[transducers]")
 {
     const auto xform = dux::take_while([](int x) { return x < 10; });

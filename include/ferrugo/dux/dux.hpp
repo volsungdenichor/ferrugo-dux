@@ -9,6 +9,7 @@
 #include <ferrugo/dux/intersperse.hpp>
 #include <ferrugo/dux/join.hpp>
 #include <ferrugo/dux/reduce.hpp>
+#include <ferrugo/dux/stride.hpp>
 #include <ferrugo/dux/take.hpp>
 #include <ferrugo/dux/take_while.hpp>
 #include <ferrugo/dux/transform.hpp>
