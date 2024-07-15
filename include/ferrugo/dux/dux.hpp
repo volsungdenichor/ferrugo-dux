@@ -4,10 +4,8 @@
 #include <ferrugo/dux/drop.hpp>
 #include <ferrugo/dux/drop_while.hpp>
 #include <ferrugo/dux/filter.hpp>
-#include <ferrugo/dux/filter_i.hpp>
 #include <ferrugo/dux/index.hpp>
 #include <ferrugo/dux/inspect.hpp>
-#include <ferrugo/dux/inspect_i.hpp>
 #include <ferrugo/dux/intersperse.hpp>
 #include <ferrugo/dux/join.hpp>
 #include <ferrugo/dux/reduce.hpp>
@@ -15,6 +13,4 @@
 #include <ferrugo/dux/take.hpp>
 #include <ferrugo/dux/take_while.hpp>
 #include <ferrugo/dux/transform.hpp>
-#include <ferrugo/dux/transform_i.hpp>
 #include <ferrugo/dux/transform_maybe.hpp>
-#include <ferrugo/dux/transform_maybe_i.hpp>
