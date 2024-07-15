@@ -42,16 +42,6 @@ struct index_fn
     }
 };
 
-template <class F>
-struct indexed_fn
-{
-    template <class... Args>
-    auto operator()(Args&&... args) const
-    {
-        return compose(index_fn{}(), F{}(std::forward<Args>(args)...));
-    }
-};
-
 }  // namespace detail
 
 static constexpr inline auto index = detail::index_fn{};

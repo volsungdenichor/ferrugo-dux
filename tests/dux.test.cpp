@@ -77,6 +77,16 @@ TEST_CASE("filter", "[transducers]")
         matchers::equal_to(28));
 }
 
+TEST_CASE("filter_i", "[transducers]")
+{
+    const auto xform = dux::filter_i([](int i, int x) { return i % 3 == 0 && x < 10; });
+    const std::vector<int> in = { 2, 3, 5, 7, 9, 11, 12, 13, 14 };
+
+    REQUIRE_THAT(  //
+        dux::to_vector<int>(xform, in),
+        matchers::elements_are(2, 7));
+}
+
 TEST_CASE("take", "[transducers]")
 {
     const auto xform = dux::take(3);
@@ -172,4 +182,59 @@ TEST_CASE("transform_maybe", "[transducers]")
     REQUIRE_THAT(  //
         dux::to_vector<std::string>(xform, in),
         matchers::elements_are("2", "4", "6"));
+}
+
+TEST_CASE("transform_maybe_i", "[transducers]")
+{
+    const auto xform = dux::transform_maybe_i(
+        [](int i, int x) -> std::optional<std::string>
+        {
+            return i % 2 == 0  //
+                       ? std::optional<std::string>{ std::to_string(x) }
+                       : std::optional<std::string>{};
+        });
+    const std::vector<int> in = { 1, 2, 3, 4, 5, 6 };
+
+    REQUIRE_THAT(  //
+        dux::to_vector<std::string>(xform, in),
+        matchers::elements_are("1", "3", "5"));
+}
+
+TEST_CASE("inspect", "[transducers]")
+{
+    std::stringstream ss;
+    const auto xform = dux::inspect([&](int x) { ss << x << " "; });
+
+    const std::vector<int> in = { 1, 2, 3, 4, 5, 6 };
+
+    dux::to_vector<int>(xform, in);
+
+    REQUIRE_THAT(  //
+        ss.str(),
+        matchers::equal_to("1 2 3 4 5 6 "));
+}
+
+TEST_CASE("inspect_i", "[transducers]")
+{
+    std::stringstream ss;
+    const auto xform = dux::inspect_i(
+        [&](int i, int x)
+        {
+            if (i % 2 == 0)
+            {
+                ss << x << " ";
+            }
+            else
+            {
+                ss << "... ";
+            }
+        });
+
+    const std::vector<int> in = { 1, 2, 3, 4, 5, 6 };
+
+    dux::to_vector<int>(xform, in);
+
+    REQUIRE_THAT(  //
+        ss.str(),
+        matchers::equal_to("1 ... 3 ... 5 ... "));
 }
