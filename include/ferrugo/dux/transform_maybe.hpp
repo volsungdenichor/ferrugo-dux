@@ -17,7 +17,7 @@ struct transform_maybe_fn
         Func m_func;
 
         template <class State, class... Args>
-        auto operator()(State state, Args&&... args) const -> State
+        constexpr auto operator()(State state, Args&&... args) const -> State
         {
             if (auto res = std::invoke(m_func, std::forward<Args>(args)...))
             {
@@ -34,14 +34,14 @@ struct transform_maybe_fn
         Func m_func;
 
         template <class Next>
-        auto operator()(Next next) const -> reducer_t<Next, Func>
+        constexpr auto operator()(Next next) const -> reducer_t<Next, Func>
         {
             return { std::move(next), m_func };
         }
     };
 
     template <class Func>
-    auto operator()(Func&& func) const -> transducer_t<std::decay_t<Func>>
+    constexpr auto operator()(Func&& func) const -> transducer_t<std::decay_t<Func>>
     {
         return { std::forward<Func>(func) };
     }

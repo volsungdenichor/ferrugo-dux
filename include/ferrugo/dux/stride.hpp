@@ -20,7 +20,7 @@ struct stride_fn
         mutable std::ptrdiff_t m_index = 0;
 
         template <class State, class... Args>
-        auto operator()(State state, Args&&... args) const -> State
+        constexpr auto operator()(State state, Args&&... args) const -> State
         {
             if ((m_index++ % m_count) == 0)
             {
@@ -35,13 +35,13 @@ struct stride_fn
         std::ptrdiff_t m_count;
 
         template <class Next>
-        auto operator()(Next next) const -> reducer_t<Next>
+        constexpr auto operator()(Next next) const -> reducer_t<Next>
         {
             return { std::move(next), m_count, 0 };
         }
     };
 
-    auto operator()(std::ptrdiff_t count) const -> transducer_t
+    constexpr auto operator()(std::ptrdiff_t count) const -> transducer_t
     {
         return { count };
     }

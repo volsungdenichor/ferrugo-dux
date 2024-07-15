@@ -18,7 +18,7 @@ struct filter_i_fn
         mutable std::ptrdiff_t m_index = 0;
 
         template <class State, class... Args>
-        auto operator()(State state, Args&&... args) const -> State
+        constexpr auto operator()(State state, Args&&... args) const -> State
         {
             if (std::invoke(m_pred, m_index++, std::forward<Args>(args)...))
             {
@@ -34,14 +34,14 @@ struct filter_i_fn
         Pred m_pred;
 
         template <class Next>
-        auto operator()(Next next) const -> reducer_t<Next, Pred>
+        constexpr auto operator()(Next next) const -> reducer_t<Next, Pred>
         {
             return { std::move(next), m_pred };
         }
     };
 
     template <class Pred>
-    auto operator()(Pred&& pred) const -> transducer_t<std::decay_t<Pred>>
+    constexpr auto operator()(Pred&& pred) const -> transducer_t<std::decay_t<Pred>>
     {
         return { std::forward<Pred>(pred) };
     }

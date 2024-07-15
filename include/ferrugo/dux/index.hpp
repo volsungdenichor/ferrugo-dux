@@ -19,7 +19,7 @@ struct index_fn
         mutable std::ptrdiff_t m_start;
 
         template <class State, class... Args>
-        auto operator()(State state, Args&&... args) const -> State
+        constexpr auto operator()(State state, Args&&... args) const -> State
         {
             return m_next(std::move(state), m_start++, std::forward<Args>(args)...);
         }
@@ -30,13 +30,13 @@ struct index_fn
         std::ptrdiff_t m_start;
 
         template <class Next>
-        auto operator()(Next next) const -> reducer_t<Next>
+        constexpr auto operator()(Next next) const -> reducer_t<Next>
         {
             return { std::move(next), m_start };
         }
     };
 
-    auto operator()(std::ptrdiff_t start = 0) const -> transducer_t
+    constexpr auto operator()(std::ptrdiff_t start = 0) const -> transducer_t
     {
         return { start };
     }

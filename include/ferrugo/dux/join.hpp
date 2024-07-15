@@ -19,7 +19,7 @@ struct join_with_fn
         mutable bool m_init = false;
 
         template <class State, class Arg>
-        auto operator()(State state, Arg&& arg) const -> State
+        constexpr auto operator()(State state, Arg&& arg) const -> State
         {
             if (m_init)
             {
@@ -43,14 +43,14 @@ struct join_with_fn
         Delimiter m_delimiter;
 
         template <class Next>
-        auto operator()(Next next) const -> reducer_t<Next, Delimiter>
+        constexpr auto operator()(Next next) const -> reducer_t<Next, Delimiter>
         {
             return { std::move(next), m_delimiter };
         }
     };
 
     template <class Delimiter>
-    auto operator()(Delimiter&& delimiter) const -> transducer_t<std::decay_t<Delimiter>>
+    constexpr auto operator()(Delimiter&& delimiter) const -> transducer_t<std::decay_t<Delimiter>>
     {
         return { std::forward<Delimiter>(delimiter) };
     }
@@ -64,7 +64,7 @@ struct join_fn
         Next m_next;
 
         template <class State, class Arg>
-        auto operator()(State state, Arg&& arg) const -> State
+        constexpr auto operator()(State state, Arg&& arg) const -> State
         {
             for (auto&& item : arg)
             {
@@ -75,7 +75,7 @@ struct join_fn
     };
 
     template <class Next>
-    auto operator()(Next next) const -> reducer_t<Next>
+    constexpr auto operator()(Next next) const -> reducer_t<Next>
     {
         return { std::move(next) };
     }

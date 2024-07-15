@@ -18,7 +18,7 @@ struct transform_i_fn
         mutable std::ptrdiff_t m_index = 0;
 
         template <class State, class... Args>
-        auto operator()(State state, Args&&... args) const -> State
+        constexpr auto operator()(State state, Args&&... args) const -> State
         {
             return m_next(std::move(state), std::invoke(m_func, m_index++, std::forward<Args>(args)...));
         }
@@ -30,14 +30,14 @@ struct transform_i_fn
         Func m_func;
 
         template <class Next>
-        auto operator()(Next next) const -> reducer_t<Next, Func>
+        constexpr auto operator()(Next next) const -> reducer_t<Next, Func>
         {
             return { std::move(next), m_func };
         }
     };
 
     template <class Func>
-    auto operator()(Func&& func) const -> transducer_t<std::decay_t<Func>>
+    constexpr auto operator()(Func&& func) const -> transducer_t<std::decay_t<Func>>
     {
         return { std::forward<Func>(func) };
     }

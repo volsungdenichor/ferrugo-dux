@@ -21,7 +21,7 @@ struct intersperse_fn
         mutable bool m_init = false;
 
         template <class State, class... Args>
-        auto operator()(State state, Args&&... args) const -> State
+        constexpr auto operator()(State state, Args&&... args) const -> State
         {
             if (m_init)
             {
@@ -38,14 +38,14 @@ struct intersperse_fn
         Delimiter m_delimiter;
 
         template <class Next>
-        auto operator()(Next next) const -> reducer_t<Next, Delimiter>
+        constexpr auto operator()(Next next) const -> reducer_t<Next, Delimiter>
         {
             return { std::move(next), m_delimiter };
         }
     };
 
     template <class Delimiter>
-    auto operator()(Delimiter&& delimiter) const -> transducer_t<std::decay_t<Delimiter>>
+    constexpr auto operator()(Delimiter&& delimiter) const -> transducer_t<std::decay_t<Delimiter>>
     {
         return { std::forward<Delimiter>(delimiter) };
     }
