@@ -10,3 +10,4 @@
 #include <ferrugo/dux/take.hpp>
 #include <ferrugo/dux/take_while.hpp>
 #include <ferrugo/dux/transform.hpp>
+#include <ferrugo/dux/transform_maybe.hpp>

@@ -1,5 +1,6 @@
 #include <catch2/catch_test_macros.hpp>
 #include <ferrugo/dux/dux.hpp>
+#include <optional>
 
 #include "matchers.hpp"
 
@@ -131,4 +132,22 @@ TEST_CASE("intersperse", "[transducers]")
     REQUIRE_THAT(  //
         dux::to_vector<int>(xform, in),
         matchers::elements_are(2, -1, 4, -1, 6, -1, 8));
+}
+
+TEST_CASE("transform_maybe", "[transducers]")
+{
+    const auto xform = dux::transform_maybe(
+        [](int x) -> std::optional<std::string>
+        {
+            if (x % 2 == 0)
+            {
+                return std::to_string(x);
+            }
+            return {};
+        });
+    const std::vector<int> in = { 1, 2, 3, 4, 5, 6 };
+
+    REQUIRE_THAT(  //
+        dux::to_vector<std::string>(xform, in),
+        matchers::elements_are("2", "4", "6"));
 }
