@@ -122,3 +122,13 @@ TEST_CASE("join_with", "[transducers]")
         dux::into(std::string{}, xform, in),
         matchers::equal_to("Alpha, Beta, Gamma"));
 }
+
+TEST_CASE("intersperse", "[transducers]")
+{
+    const auto xform = dux::intersperse(-1);
+    const std::vector<int> in = { 2, 4, 6, 8 };
+
+    REQUIRE_THAT(  //
+        dux::to_vector<int>(xform, in),
+        matchers::elements_are(2, -1, 4, -1, 6, -1, 8));
+}

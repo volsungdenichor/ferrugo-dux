@@ -25,7 +25,7 @@ struct drop_while_fn
                 m_done = !std::invoke(m_pred, args...);
             }
             return m_done  //
-                       ? m_next(state, std::forward<Args>(args)...)
+                       ? m_next(std::move(state), std::forward<Args>(args)...)
                        : state;
         }
     };

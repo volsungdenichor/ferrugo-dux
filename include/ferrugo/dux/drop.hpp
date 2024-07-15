@@ -25,7 +25,7 @@ struct drop_fn
             {
                 return state;
             }
-            return m_next(state, std::forward<Args>(args)...);
+            return m_next(std::move(state), std::forward<Args>(args)...);
         }
     };
 

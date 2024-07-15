@@ -25,13 +25,13 @@ struct join_with_fn
             {
                 for (const auto& item : m_delimiter)
                 {
-                    state = m_next(state, item);
+                    state = m_next(std::move(state), item);
                 }
             }
             m_init = true;
             for (auto&& item : arg)
             {
-                state = m_next(state, std::forward<decltype(item)>(item));
+                state = m_next(std::move(state), std::forward<decltype(item)>(item));
             }
             return state;
         }
@@ -68,7 +68,7 @@ struct join_fn
         {
             for (auto&& item : arg)
             {
-                state = m_next(state, std::forward<decltype(item)>(item));
+                state = m_next(std::move(state), std::forward<decltype(item)>(item));
             }
             return state;
         }

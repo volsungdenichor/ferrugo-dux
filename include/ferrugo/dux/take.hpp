@@ -23,7 +23,7 @@ struct take_fn
         {
             if (m_count-- > 0)
             {
-                return m_next(state, std::forward<Args>(args)...);
+                return m_next(std::move(state), std::forward<Args>(args)...);
             }
             return state;
         }
