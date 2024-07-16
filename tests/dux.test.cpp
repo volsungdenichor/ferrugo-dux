@@ -41,7 +41,7 @@ TEST_CASE("transform", "[transducers]")
     const std::vector<int> in = { 2, 3, 5, 7, 9, 11 };
 
     REQUIRE_THAT(  //
-        dux::into(std::vector<std::string>{}, xform, in),
+        dux::push_back(std::vector<std::string>{}, xform, in),
         matchers::elements_are("2", "3", "5", "7", "9", "11"));
 
     REQUIRE_THAT(  //
@@ -55,7 +55,7 @@ TEST_CASE("transform_i", "[transducers]")
     const std::vector<int> in = { 2, 3, 5, 7, 9, 11 };
 
     REQUIRE_THAT(  //
-        dux::into(std::vector<std::string>{}, xform, in),
+        dux::push_back(std::vector<std::string>{}, xform, in),
         matchers::elements_are("0. 2", "1. 3", "2. 5", "3. 7", "4. 9", "5. 11"));
 
     REQUIRE_THAT(  //
@@ -143,7 +143,7 @@ TEST_CASE("join", "[transducers]")
     const std::vector<std::string> in = { "Alpha", "Beta", "Gamma" };
 
     REQUIRE_THAT(  //
-        dux::into(std::string{}, xform, in),
+        dux::push_back(std::string{}, xform, in),
         matchers::equal_to("AlphaBetaGamma"));
 }
 
@@ -154,7 +154,7 @@ TEST_CASE("join_with", "[transducers]")
     const std::vector<std::string> in = { "Alpha", "Beta", "Gamma" };
 
     REQUIRE_THAT(  //
-        dux::into(std::string{}, xform, in),
+        dux::push_back(std::string{}, xform, in),
         matchers::equal_to("Alpha, Beta, Gamma"));
 }
 

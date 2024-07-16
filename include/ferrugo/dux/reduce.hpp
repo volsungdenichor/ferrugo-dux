@@ -71,28 +71,40 @@ struct transduce_fn
 
 static constexpr inline auto transduce = transduce_fn{};
 
-struct into_fn
+struct copy_fn
+{
+    template <class Out, class Transducer, class... Ranges>
+    auto operator()(Out out, Transducer&& transducer, Ranges&&... ranges) const -> Out
+    {
+        return transduce(std::forward<Transducer>(transducer), output, std::move(out), std::forward<Ranges>(ranges)...);
+    }
+};
+
+static constexpr inline auto copy = copy_fn{};
+
+struct push_back_fn
 {
     template <class Result, class Transducer, class... Ranges>
     auto operator()(Result&& result, Transducer&& transducer, Ranges&&... ranges) const -> Result&&
     {
-        transduce(std::forward<Transducer>(transducer), output, std::back_inserter(result), std::forward<Ranges>(ranges)...);
+        copy(std::back_inserter(result), std::forward<Transducer>(transducer), std::forward<Ranges>(ranges)...);
         return std::forward<Result>(result);
     }
 };
 
-static constexpr inline auto into = into_fn{};
+static constexpr inline auto push_back = push_back_fn{};
 
 }  // namespace detail
 
-using detail::into;
+using detail::copy;
+using detail::push_back;
 using detail::reduce;
 using detail::transduce;
 
 template <class T, class Transducer, class... Ranges>
 auto to_vector(Transducer&& transducer, Ranges&&... ranges) -> std::vector<T>
 {
-    return into(std::vector<T>{}, std::forward<Transducer>(transducer), std::forward<Ranges>(ranges)...);
+    return push_back(std::vector<T>{}, std::forward<Transducer>(transducer), std::forward<Ranges>(ranges)...);
 }
 
 }  // namespace dux
