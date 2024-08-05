@@ -22,11 +22,7 @@ struct stride_fn
         template <class State, class... Args>
         constexpr auto operator()(State state, Args&&... args) const -> State
         {
-            if ((m_index++ % m_count) == 0)
-            {
-                return m_next(std::move(state), std::forward<Args>(args)...);
-            }
-            return state;
+            return (m_index++ % m_count) == 0 ? m_next(std::move(state), std::forward<Args>(args)...) : state;
         }
     };
 

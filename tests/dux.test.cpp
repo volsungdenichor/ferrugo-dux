@@ -238,3 +238,43 @@ TEST_CASE("inspect_i", "[transducers]")
         ss.str(),
         matchers::equal_to("1 ... 3 ... 5 ... "));
 }
+
+TEST_CASE("compose", "[transducers]")
+{
+    const auto xform = dux::compose(
+        dux::filter([](int x) { return x % 2 == 0; }),
+        dux::transform([](int x) { return std::to_string(x); }),
+        dux::drop_while([](const std::string& x) { return x.size() < 2; }),
+        dux::take(3));
+
+    const std::vector<int> in = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19 };
+
+    REQUIRE_THAT(  //
+        dux::to_vector<std::string>(xform, in),
+        matchers::elements_are("10", "12", "14"));
+}
+
+TEST_CASE("two inputs", "[transducers]")
+{
+    const auto xform = dux::transform([](int x, char y) { return std::to_string(x) + y; });
+
+    const std::vector<int> in1 = { 2, 3, 4 };
+    const std::string in2 = "ABCDEF";
+
+    REQUIRE_THAT(  //
+        dux::to_vector<std::string>(xform, in1, in2),
+        matchers::elements_are("2A", "3B", "4C"));
+}
+
+TEST_CASE("three inputs", "[transducers]")
+{
+    const auto xform = dux::transform([](int x, char y, char z) { return std::to_string(x) + y + z; });
+
+    const std::vector<int> in1 = { 2, 3, 4 };
+    const std::string in2 = "ABCDEF";
+    const std::string in3 = "+-+-+";
+
+    REQUIRE_THAT(  //
+        dux::to_vector<std::string>(xform, in1, in2, in3),
+        matchers::elements_are("2A+", "3B-", "4C+"));
+}

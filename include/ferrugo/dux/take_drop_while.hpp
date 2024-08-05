@@ -8,7 +8,9 @@ namespace dux
 {
 namespace detail
 {
-struct take_while_fn
+
+template <bool Type>
+struct take_drop_while_fn
 {
     template <class Next, class Pred>
     struct reducer_t
@@ -24,9 +26,7 @@ struct take_while_fn
             {
                 m_done = !std::invoke(m_pred, args...);
             }
-            return !m_done  //
-                       ? m_next(std::move(state), std::forward<Args>(args)...)
-                       : state;
+            return m_done == Type ? m_next(std::move(state), std::forward<Args>(args)...) : state;
         }
     };
 
@@ -50,6 +50,7 @@ struct take_while_fn
 };
 }  // namespace detail
 
-static constexpr inline auto take_while = detail::take_while_fn{};
+static constexpr inline auto take_while = detail::take_drop_while_fn<false>{};
+static constexpr inline auto drop_while = detail::take_drop_while_fn<true>{};
 }  // namespace dux
 }  // namespace ferrugo

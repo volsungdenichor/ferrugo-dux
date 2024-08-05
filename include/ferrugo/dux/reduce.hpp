@@ -45,11 +45,60 @@ struct reduce_fn
     template <class Reducer, class Seed, class Range>
     auto operator()(Reducer&& reducer, Seed seed, Range&& range) const -> Seed
     {
-        const auto b = std::begin(range);
+        auto it = std::begin(range);
         const auto e = std::end(range);
-        for (auto it = b; it != e; ++it)
+        for (; it != e; ++it)
         {
             seed = std::invoke(reducer, std::move(seed), *it);
+        }
+        return seed;
+    }
+
+    template <class Reducer, class Seed, class Range1, class Range2>
+    auto operator()(Reducer&& reducer, Seed seed, Range1&& range1, Range2&& range2) const -> Seed
+    {
+        auto it1 = std::begin(range1);
+        auto it2 = std::begin(range2);
+        const auto e1 = std::end(range1);
+        const auto e2 = std::end(range2);
+        for (; it1 != e1 && it2 != e2; ++it1, ++it2)
+        {
+            seed = std::invoke(reducer, std::move(seed), *it1, *it2);
+        }
+        return seed;
+    }
+
+    template <class Reducer, class Seed, class Range1, class Range2, class Range3>
+    auto operator()(Reducer&& reducer, Seed seed, Range1&& range1, Range2&& range2, Range3&& range3) const -> Seed
+    {
+        auto it1 = std::begin(range1);
+        auto it2 = std::begin(range2);
+        auto it3 = std::begin(range3);
+        const auto e1 = std::end(range1);
+        const auto e2 = std::end(range2);
+        const auto e3 = std::end(range3);
+        for (; it1 != e1 && it2 != e2 && it3 != e3; ++it1, ++it2, ++it3)
+        {
+            seed = std::invoke(reducer, std::move(seed), *it1, *it2, *it3);
+        }
+        return seed;
+    }
+
+    template <class Reducer, class Seed, class Range1, class Range2, class Range3, class Range4>
+    auto operator()(Reducer&& reducer, Seed seed, Range1&& range1, Range2&& range2, Range3&& range3, Range4&& range4) const
+        -> Seed
+    {
+        auto it1 = std::begin(range1);
+        auto it2 = std::begin(range2);
+        auto it3 = std::begin(range3);
+        auto it4 = std::begin(range4);
+        const auto e1 = std::end(range1);
+        const auto e2 = std::end(range2);
+        const auto e3 = std::end(range3);
+        const auto e4 = std::end(range4);
+        for (; it1 != e1 && it2 != e2 && it3 != e3 && it4 != e4; ++it1, ++it2, ++it3, ++it4)
+        {
+            seed = std::invoke(reducer, std::move(seed), *it1, *it2, *it3, *it4);
         }
         return seed;
     }

@@ -10,7 +10,8 @@ namespace dux
 namespace detail
 {
 
-struct drop_fn
+template <bool Type>
+struct take_drop_fn
 {
     template <class Next>
     struct reducer_t
@@ -21,11 +22,8 @@ struct drop_fn
         template <class State, class... Args>
         constexpr auto operator()(State state, Args&&... args) const -> State
         {
-            if (m_count-- > 0)
-            {
-                return state;
-            }
-            return m_next(std::move(state), std::forward<Args>(args)...);
+            const auto done = m_count-- <= 0;
+            return done == Type ? m_next(std::move(state), std::forward<Args>(args)...) : state;
         }
     };
 
@@ -48,6 +46,7 @@ struct drop_fn
 
 }  // namespace detail
 
-static constexpr inline auto drop = detail::drop_fn{};
+static constexpr inline auto take = detail::take_drop_fn<false>{};
+static constexpr inline auto drop = detail::take_drop_fn<true>{};
 }  // namespace dux
 }  // namespace ferrugo
