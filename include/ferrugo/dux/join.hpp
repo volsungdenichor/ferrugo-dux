@@ -75,9 +75,9 @@ struct join_fn
     };
 
     template <class Reducer>
-    constexpr auto operator()(Reducer next) const -> reducer_t<Reducer>
+    constexpr auto operator()(Reducer next_reducer) const -> reducer_t<Reducer>
     {
-        return { std::move(next) };
+        return { std::move(next_reducer) };
     }
 };
 }  // namespace detail
