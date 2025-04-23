@@ -13,10 +13,10 @@ namespace detail
 
 struct intersperse_fn
 {
-    template <class Next, class Delimiter>
+    template <class Reducer, class Delimiter>
     struct reducer_t
     {
-        Next m_next;
+        Reducer m_next_reducer;
         Delimiter m_delimiter;
         mutable bool m_init = false;
 
@@ -25,10 +25,10 @@ struct intersperse_fn
         {
             if (m_init)
             {
-                state = m_next(std::move(state), m_delimiter);
+                state = m_next_reducer(std::move(state), m_delimiter);
             }
             m_init = true;
-            return m_next(std::move(state), std::forward<Args>(args)...);
+            return m_next_reducer(std::move(state), std::forward<Args>(args)...);
         }
     };
 
@@ -37,10 +37,10 @@ struct intersperse_fn
     {
         Delimiter m_delimiter;
 
-        template <class Next>
-        constexpr auto operator()(Next next) const -> reducer_t<Next, Delimiter>
+        template <class Reducer>
+        constexpr auto operator()(Reducer next_reducer) const -> reducer_t<Reducer, Delimiter>
         {
-            return { std::move(next), m_delimiter };
+            return { std::move(next_reducer), m_delimiter };
         }
     };
 

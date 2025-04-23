@@ -11,10 +11,10 @@ namespace detail
 
 struct drop_while_fn
 {
-    template <class Next, class Pred>
+    template <class Reducer, class Pred>
     struct reducer_t
     {
-        Next m_next;
+        Reducer m_next_reducer;
         Pred m_pred;
         mutable bool m_done = false;
 
@@ -25,7 +25,7 @@ struct drop_while_fn
             {
                 m_done = !std::invoke(m_pred, args...);
             }
-            return m_done ? m_next(std::move(state), std::forward<Args>(args)...) : state;
+            return m_done ? m_next_reducer(std::move(state), std::forward<Args>(args)...) : state;
         }
     };
 
@@ -34,10 +34,10 @@ struct drop_while_fn
     {
         Pred m_pred;
 
-        template <class Next>
-        constexpr auto operator()(Next next) const -> reducer_t<Next, Pred>
+        template <class Reducer>
+        constexpr auto operator()(Reducer next_reducer) const -> reducer_t<Reducer, Pred>
         {
-            return { std::move(next), m_pred };
+            return { std::move(next_reducer), m_pred };
         }
     };
 

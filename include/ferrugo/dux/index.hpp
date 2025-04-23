@@ -12,16 +12,16 @@ namespace detail
 
 struct index_fn
 {
-    template <class Next>
+    template <class Reducer>
     struct reducer_t
     {
-        Next m_next;
+        Reducer m_next_reducer;
         mutable std::ptrdiff_t m_start;
 
         template <class State, class... Args>
         constexpr auto operator()(State state, Args&&... args) const -> State
         {
-            return m_next(std::move(state), m_start++, std::forward<Args>(args)...);
+            return m_next_reducer(std::move(state), m_start++, std::forward<Args>(args)...);
         }
     };
 
@@ -29,10 +29,10 @@ struct index_fn
     {
         std::ptrdiff_t m_start;
 
-        template <class Next>
-        constexpr auto operator()(Next next) const -> reducer_t<Next>
+        template <class Reducer>
+        constexpr auto operator()(Reducer next_reducer) const -> reducer_t<Reducer>
         {
-            return { std::move(next), m_start };
+            return { std::move(next_reducer), m_start };
         }
     };
 

@@ -12,33 +12,33 @@ namespace detail
 template <bool Indexed>
 struct transform_fn
 {
-    template <bool, class Next, class Func>
+    template <bool, class Reducer, class Func>
     struct reducer_t;
 
-    template <class Next, class Func>
-    struct reducer_t<false, Next, Func>
+    template <class Reducer, class Func>
+    struct reducer_t<false, Reducer, Func>
     {
-        Next m_next;
+        Reducer m_next_reducer;
         Func m_func;
 
         template <class State, class... Args>
         constexpr auto operator()(State state, Args&&... args) const -> State
         {
-            return m_next(std::move(state), std::invoke(m_func, std::forward<Args>(args)...));
+            return m_next_reducer(std::move(state), std::invoke(m_func, std::forward<Args>(args)...));
         }
     };
 
-    template <class Next, class Func>
-    struct reducer_t<true, Next, Func>
+    template <class Reducer, class Func>
+    struct reducer_t<true, Reducer, Func>
     {
-        Next m_next;
+        Reducer m_next_reducer;
         Func m_func;
         mutable std::ptrdiff_t m_index = 0;
 
         template <class State, class... Args>
         constexpr auto operator()(State state, Args&&... args) const -> State
         {
-            return m_next(std::move(state), std::invoke(m_func, m_index++, std::forward<Args>(args)...));
+            return m_next_reducer(std::move(state), std::invoke(m_func, m_index++, std::forward<Args>(args)...));
         }
     };
 
@@ -47,10 +47,10 @@ struct transform_fn
     {
         Func m_func;
 
-        template <class Next>
-        constexpr auto operator()(Next next) const -> reducer_t<Indexed, Next, Func>
+        template <class Reducer>
+        constexpr auto operator()(Reducer next_reducer) const -> reducer_t<Indexed, Reducer, Func>
         {
-            return { std::move(next), m_func };
+            return { std::move(next_reducer), m_func };
         }
     };
 

@@ -11,10 +11,10 @@ namespace detail
 
 struct join_with_fn
 {
-    template <class Next, class Delimiter>
+    template <class Reducer, class Delimiter>
     struct reducer_t
     {
-        Next m_next;
+        Reducer m_next_reducer;
         Delimiter m_delimiter;
         mutable bool m_init = false;
 
@@ -25,13 +25,13 @@ struct join_with_fn
             {
                 for (const auto& item : m_delimiter)
                 {
-                    state = m_next(std::move(state), item);
+                    state = m_next_reducer(std::move(state), item);
                 }
             }
             m_init = true;
             for (auto&& item : arg)
             {
-                state = m_next(std::move(state), std::forward<decltype(item)>(item));
+                state = m_next_reducer(std::move(state), std::forward<decltype(item)>(item));
             }
             return state;
         }
@@ -42,10 +42,10 @@ struct join_with_fn
     {
         Delimiter m_delimiter;
 
-        template <class Next>
-        constexpr auto operator()(Next next) const -> reducer_t<Next, Delimiter>
+        template <class Reducer>
+        constexpr auto operator()(Reducer next_reducer) const -> reducer_t<Reducer, Delimiter>
         {
-            return { std::move(next), m_delimiter };
+            return { std::move(next_reducer), m_delimiter };
         }
     };
 
@@ -58,24 +58,24 @@ struct join_with_fn
 
 struct join_fn
 {
-    template <class Next>
+    template <class Reducer>
     struct reducer_t
     {
-        Next m_next;
+        Reducer m_next_reducer;
 
         template <class State, class Arg>
         constexpr auto operator()(State state, Arg&& arg) const -> State
         {
             for (auto&& item : arg)
             {
-                state = m_next(std::move(state), std::forward<decltype(item)>(item));
+                state = m_next_reducer(std::move(state), std::forward<decltype(item)>(item));
             }
             return state;
         }
     };
 
-    template <class Next>
-    constexpr auto operator()(Next next) const -> reducer_t<Next>
+    template <class Reducer>
+    constexpr auto operator()(Reducer next) const -> reducer_t<Reducer>
     {
         return { std::move(next) };
     }

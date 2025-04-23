@@ -12,16 +12,16 @@ namespace detail
 
 struct drop_fn
 {
-    template <class Next>
+    template <class Reducer>
     struct reducer_t
     {
-        Next m_next;
+        Reducer m_next_reducer;
         mutable std::ptrdiff_t m_count;
 
         template <class State, class... Args>
         constexpr auto operator()(State state, Args&&... args) const -> State
         {
-            return m_count-- <= 0 ? m_next(std::move(state), std::forward<Args>(args)...) : state;
+            return m_count-- <= 0 ? m_next_reducer(std::move(state), std::forward<Args>(args)...) : state;
         }
     };
 
@@ -29,10 +29,10 @@ struct drop_fn
     {
         std::ptrdiff_t m_count;
 
-        template <class Next>
-        constexpr auto operator()(Next next) const -> reducer_t<Next>
+        template <class Reducer>
+        constexpr auto operator()(Reducer next_reducer) const -> reducer_t<Reducer>
         {
-            return { std::move(next), m_count };
+            return { std::move(next_reducer), m_count };
         }
     };
 

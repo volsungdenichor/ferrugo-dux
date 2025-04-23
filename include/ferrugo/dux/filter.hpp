@@ -11,13 +11,13 @@ namespace detail
 template <bool Indexed>
 struct filter_fn
 {
-    template <bool, class Next, class Pred>
+    template <bool, class Reducer, class Pred>
     struct reducer_t;
 
-    template <class Next, class Pred>
-    struct reducer_t<false, Next, Pred>
+    template <class Reducer, class Pred>
+    struct reducer_t<false, Reducer, Pred>
     {
-        Next m_next;
+        Reducer m_next_reducer;
         Pred m_pred;
 
         template <class State, class... Args>
@@ -25,16 +25,16 @@ struct filter_fn
         {
             if (std::invoke(m_pred, std::forward<Args>(args)...))
             {
-                return m_next(std::move(state), std::forward<Args>(args)...);
+                return m_next_reducer(std::move(state), std::forward<Args>(args)...);
             }
             return state;
         }
     };
 
-    template <class Next, class Pred>
-    struct reducer_t<true, Next, Pred>
+    template <class Reducer, class Pred>
+    struct reducer_t<true, Reducer, Pred>
     {
-        Next m_next;
+        Reducer m_next_reducer;
         Pred m_pred;
         mutable std::ptrdiff_t m_index = 0;
 
@@ -43,7 +43,7 @@ struct filter_fn
         {
             if (std::invoke(m_pred, m_index++, std::forward<Args>(args)...))
             {
-                return m_next(std::move(state), std::forward<Args>(args)...);
+                return m_next_reducer(std::move(state), std::forward<Args>(args)...);
             }
             return state;
         }
@@ -54,10 +54,10 @@ struct filter_fn
     {
         Pred m_pred;
 
-        template <class Next>
-        constexpr auto operator()(Next next) const -> reducer_t<Indexed, Next, Pred>
+        template <class Reducer>
+        constexpr auto operator()(Reducer next_reducer) const -> reducer_t<Indexed, Reducer, Pred>
         {
-            return { std::move(next), m_pred };
+            return { std::move(next_reducer), m_pred };
         }
     };
 
