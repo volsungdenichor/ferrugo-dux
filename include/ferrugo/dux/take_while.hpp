@@ -21,10 +21,7 @@ struct take_while_fn
         template <class State, class... Args>
         constexpr auto operator()(State state, Args&&... args) const -> State
         {
-            if (!m_done)
-            {
-                m_done = !std::invoke(m_pred, args...);
-            }
+            m_done = m_done || !std::invoke(m_pred, args...);
             return !m_done ? m_next_reducer(std::move(state), std::forward<Args>(args)...) : state;
         }
     };

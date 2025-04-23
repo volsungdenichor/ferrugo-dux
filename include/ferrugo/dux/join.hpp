@@ -9,6 +9,16 @@ namespace dux
 namespace detail
 {
 
+template <class Iter, class State, class BinaryOp>
+constexpr auto accumulate(Iter begin, Iter end, State state, BinaryOp&& op) -> State
+{
+    for (; begin != end; ++begin)
+    {
+        state = std::invoke(op, std::move(state), *begin);
+    }
+    return state;
+}
+
 struct join_with_fn
 {
     template <class Reducer, class Delimiter>
@@ -16,24 +26,17 @@ struct join_with_fn
     {
         Reducer m_next_reducer;
         Delimiter m_delimiter;
-        mutable bool m_init = false;
+        mutable bool m_first_item = true;
 
         template <class State, class Arg>
         constexpr auto operator()(State state, Arg&& arg) const -> State
         {
-            if (m_init)
+            if (!m_first_item)
             {
-                for (const auto& item : m_delimiter)
-                {
-                    state = m_next_reducer(std::move(state), item);
-                }
+                state = accumulate(std::begin(m_delimiter), std::end(m_delimiter), std::move(state), m_next_reducer);
             }
-            m_init = true;
-            for (auto&& item : arg)
-            {
-                state = m_next_reducer(std::move(state), std::forward<decltype(item)>(item));
-            }
-            return state;
+            m_first_item = false;
+            return accumulate(std::begin(arg), std::end(arg), std::move(state), m_next_reducer);
         }
     };
 
@@ -66,11 +69,7 @@ struct join_fn
         template <class State, class Arg>
         constexpr auto operator()(State state, Arg&& arg) const -> State
         {
-            for (auto&& item : arg)
-            {
-                state = m_next_reducer(std::move(state), std::forward<decltype(item)>(item));
-            }
-            return state;
+            return accumulate(std::begin(arg), std::end(arg), std::move(state), m_next_reducer);
         }
     };
 
@@ -84,5 +83,6 @@ struct join_fn
 
 static constexpr inline auto join = detail::join_fn{};
 static constexpr inline auto join_with = detail::join_with_fn{};
+
 }  // namespace dux
 }  // namespace ferrugo
