@@ -15,29 +15,34 @@ std::string uppercase(std::string text)
 
 using namespace ferrugo;
 
-struct delimit_fn
+struct str_fn
+{
+    template <class... Args>
+    std::string operator()(const Args&... args) const
+    {
+        std::stringstream ss;
+        (ss << ... << args);
+        return ss.str();
+    }
+};
+
+static constexpr inline auto str = str_fn{};
+
+struct delimit
 {
     std::string m_delimiter;
 
     template <class T>
     auto operator()(std::string total, const T& item) const -> std::string
     {
-        const auto v = std::invoke(
-            [&]()
-            {
-                std::stringstream ss;
-                ss << item;
-                return ss.str();
-            });
+        const std::string v = str(item);
         return total.empty() ? v : total + m_delimiter + v;
     }
 };
 
-static const inline auto delimit = delimit_fn{ ", " };
-
 TEST_CASE("transform", "[transducers]")
 {
-    const auto xform = dux::transform([](int x) { return std::to_string(x); });
+    const auto xform = dux::transform(str);
     const std::vector<int> in = { 2, 3, 5, 7, 9, 11 };
 
     REQUIRE_THAT(  //
@@ -45,13 +50,17 @@ TEST_CASE("transform", "[transducers]")
         matchers::elements_are("2", "3", "5", "7", "9", "11"));
 
     REQUIRE_THAT(  //
-        dux::transduce(xform, delimit, std::string{}, in),
+        dux::to_vector<std::string>(xform, in),
+        matchers::elements_are("2", "3", "5", "7", "9", "11"));
+
+    REQUIRE_THAT(  //
+        dux::transduce(std::string{}, xform, delimit{ ", " }, in),
         matchers::equal_to("2, 3, 5, 7, 9, 11"));
 }
 
 TEST_CASE("transform_i", "[transducers]")
 {
-    const auto xform = dux::transform_i([](int i, int x) { return std::to_string(i) + ". " + std::to_string(x); });
+    const auto xform = dux::transform_i([](int i, int x) { return str(i, ". ", x); });
     const std::vector<int> in = { 2, 3, 5, 7, 9, 11 };
 
     REQUIRE_THAT(  //
@@ -59,7 +68,7 @@ TEST_CASE("transform_i", "[transducers]")
         matchers::elements_are("0. 2", "1. 3", "2. 5", "3. 7", "4. 9", "5. 11"));
 
     REQUIRE_THAT(  //
-        dux::transduce(xform, delimit, std::string{}, in),
+        dux::transduce(std::string{}, xform, delimit{ ", " }, in),
         matchers::equal_to("0. 2, 1. 3, 2. 5, 3. 7, 4. 9, 5. 11"));
 }
 
@@ -73,7 +82,7 @@ TEST_CASE("filter", "[transducers]")
         matchers::elements_are(2, 12, 14));
 
     REQUIRE_THAT(  //
-        dux::transduce(xform, std::plus<>{}, 0, in),
+        dux::transduce(0, xform, std::plus<>{}, in),
         matchers::equal_to(28));
 }
 
@@ -174,7 +183,7 @@ TEST_CASE("transform_maybe", "[transducers]")
         [](int x) -> std::optional<std::string>
         {
             return x % 2 == 0  //
-                       ? std::optional<std::string>{ std::to_string(x) }
+                       ? std::optional<std::string>{ str(x) }
                        : std::optional<std::string>{};
         });
     const std::vector<int> in = { 1, 2, 3, 4, 5, 6 };
@@ -190,7 +199,7 @@ TEST_CASE("transform_maybe_i", "[transducers]")
         [](int i, int x) -> std::optional<std::string>
         {
             return i % 2 == 0  //
-                       ? std::optional<std::string>{ std::to_string(x) }
+                       ? std::optional<std::string>{ str(x) }
                        : std::optional<std::string>{};
         });
     const std::vector<int> in = { 1, 2, 3, 4, 5, 6 };
@@ -243,7 +252,7 @@ TEST_CASE("compose", "[transducers]")
 {
     const auto xform = dux::compose(
         dux::filter([](int x) { return x % 2 == 0; }),
-        dux::transform([](int x) { return std::to_string(x); }),
+        dux::transform(str),
         dux::drop_while([](const std::string& x) { return x.size() < 2; }),
         dux::take(3));
 
@@ -256,7 +265,7 @@ TEST_CASE("compose", "[transducers]")
 
 TEST_CASE("two inputs", "[transducers]")
 {
-    const auto xform = dux::transform([](int x, char y) { return std::to_string(x) + y; });
+    const auto xform = dux::transform([](int x, char y) { return str(x, y); });
 
     const std::vector<int> in1 = { 2, 3, 4 };
     const std::string in2 = "ABCDEF";
@@ -268,7 +277,7 @@ TEST_CASE("two inputs", "[transducers]")
 
 TEST_CASE("three inputs", "[transducers]")
 {
-    const auto xform = dux::transform([](int x, char y, char z) { return std::to_string(x) + y + z; });
+    const auto xform = dux::transform([](int x, char y, char z) { return str(x, y, z); });
 
     const std::vector<int> in1 = { 2, 3, 4 };
     const std::string in2 = "ABCDEF";
@@ -277,4 +286,8 @@ TEST_CASE("three inputs", "[transducers]")
     REQUIRE_THAT(  //
         dux::to_vector<std::string>(xform, in1, in2, in3),
         matchers::elements_are("2A+", "3B-", "4C+"));
+
+    REQUIRE_THAT(  //
+        dux::transduce(std::string{}, xform, delimit{ "/" }, in1, in2, in3),
+        matchers::equal_to("2A+/3B-/4C+"));
 }
