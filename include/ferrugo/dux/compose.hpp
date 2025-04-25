@@ -8,6 +8,9 @@ namespace ferrugo
 namespace dux
 {
 
+namespace detail
+{
+
 template <class... Pipes>
 struct compose_t
 {
@@ -44,11 +47,7 @@ public:
     }
 };
 
-namespace detail
-{
-
-template <template <class...> class Type>
-struct function_sequence_fn
+struct compose_fn
 {
 private:
     template <class Pipe>
@@ -58,15 +57,15 @@ private:
     }
 
     template <class... Pipes>
-    constexpr auto to_tuple(Type<Pipes...> pipe) const -> std::tuple<Pipes...>
+    constexpr auto to_tuple(compose_t<Pipes...> pipe) const -> std::tuple<Pipes...>
     {
         return pipe.m_pipes;
     }
 
     template <class... Pipes>
-    constexpr auto from_tuple(std::tuple<Pipes...> tuple) const -> Type<Pipes...>
+    constexpr auto from_tuple(std::tuple<Pipes...> tuple) const -> compose_t<Pipes...>
     {
-        return Type<Pipes...>{ std::move(tuple) };
+        return compose_t<Pipes...>{ std::move(tuple) };
     }
 
 public:
@@ -80,7 +79,7 @@ public:
 
 }  // namespace detail
 
-static constexpr inline auto compose = detail::function_sequence_fn<compose_t>{};
+static constexpr inline auto compose = detail::compose_fn{};
 
 }  // namespace dux
 }  // namespace ferrugo
