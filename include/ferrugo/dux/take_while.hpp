@@ -32,9 +32,9 @@ struct take_while_fn
         Pred m_pred;
 
         template <class Reducer>
-        constexpr auto operator()(Reducer next_reducer) const -> reducer_t<Reducer, Pred>
+        constexpr auto operator()(Reducer&& next_reducer) const -> reducer_t<std::decay_t<Reducer>, Pred>
         {
-            return { std::move(next_reducer), m_pred };
+            return { std::forward<Reducer>(next_reducer), m_pred };
         }
     };
 

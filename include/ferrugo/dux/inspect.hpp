@@ -50,9 +50,9 @@ struct inspect_fn
         Func m_func;
 
         template <class Reducer>
-        constexpr auto operator()(Reducer next_reducer) const -> reducer_t<Indexed, Reducer, Func>
+        constexpr auto operator()(Reducer next_reducer) const -> reducer_t<Indexed, std::decay_t<Reducer>, Func>
         {
-            return { std::move(next_reducer), m_func };
+            return { std::forward<Reducer>(next_reducer), m_func };
         }
     };
 

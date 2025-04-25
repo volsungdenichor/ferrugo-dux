@@ -31,9 +31,9 @@ struct stride_fn
         std::ptrdiff_t m_count;
 
         template <class Reducer>
-        constexpr auto operator()(Reducer next_reducer) const -> reducer_t<Reducer>
+        constexpr auto operator()(Reducer&& next_reducer) const -> reducer_t<std::decay_t<Reducer>>
         {
-            return { std::move(next_reducer), m_count, 0 };
+            return { std::forward<Reducer>(next_reducer), m_count, 0 };
         }
     };
 

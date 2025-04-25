@@ -38,9 +38,9 @@ struct intersperse_fn
         Delimiter m_delimiter;
 
         template <class Reducer>
-        constexpr auto operator()(Reducer next_reducer) const -> reducer_t<Reducer, Delimiter>
+        constexpr auto operator()(Reducer&& next_reducer) const -> reducer_t<std::decay_t<Reducer>, Delimiter>
         {
-            return { std::move(next_reducer), m_delimiter };
+            return { std::forward<Reducer>(next_reducer), m_delimiter };
         }
     };
 
