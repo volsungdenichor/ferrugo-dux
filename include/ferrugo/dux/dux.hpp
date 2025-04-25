@@ -4,7 +4,6 @@
 #include <ferrugo/dux/drop.hpp>
 #include <ferrugo/dux/drop_while.hpp>
 #include <ferrugo/dux/filter.hpp>
-#include <ferrugo/dux/index.hpp>
 #include <ferrugo/dux/inspect.hpp>
 #include <ferrugo/dux/intersperse.hpp>
 #include <ferrugo/dux/join.hpp>
