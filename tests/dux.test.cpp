@@ -46,11 +46,11 @@ TEST_CASE("transform", "[transducers]")
     const std::vector<int> in = { 2, 3, 5, 7, 9, 11 };
 
     REQUIRE_THAT(  //
-        dux::push_back(std::vector<std::string>{}, xform, in),
+        dux::into(std::vector<std::string>{}, xform, in),
         matchers::elements_are("2", "3", "5", "7", "9", "11"));
 
     REQUIRE_THAT(  //
-        dux::to_vector<std::string>(xform, in),
+        dux::into(std::vector<std::string>{}, xform, in),
         matchers::elements_are("2", "3", "5", "7", "9", "11"));
 
     REQUIRE_THAT(  //
@@ -64,7 +64,7 @@ TEST_CASE("transform_i", "[transducers]")
     const std::vector<int> in = { 2, 3, 5, 7, 9, 11 };
 
     REQUIRE_THAT(  //
-        dux::push_back(std::vector<std::string>{}, xform, in),
+        dux::into(std::vector<std::string>{}, xform, in),
         matchers::elements_are("0. 2", "1. 3", "2. 5", "3. 7", "4. 9", "5. 11"));
 
     REQUIRE_THAT(  //
@@ -78,7 +78,7 @@ TEST_CASE("filter", "[transducers]")
     const std::vector<int> in = { 2, 3, 5, 7, 9, 11, 12, 13, 14 };
 
     REQUIRE_THAT(  //
-        dux::to_vector<int>(xform, in),
+        dux::into(std::vector<int>{}, xform, in),
         matchers::elements_are(2, 12, 14));
 
     REQUIRE_THAT(  //
@@ -92,7 +92,7 @@ TEST_CASE("filter_i", "[transducers]")
     const std::vector<int> in = { 2, 3, 5, 7, 9, 11, 12, 13, 14 };
 
     REQUIRE_THAT(  //
-        dux::to_vector<int>(xform, in),
+        dux::into(std::vector<int>{}, xform, in),
         matchers::elements_are(2, 7));
 }
 
@@ -102,7 +102,7 @@ TEST_CASE("take", "[transducers]")
     const std::vector<int> in = { 2, 3, 5, 7, 9, 11, 12, 13, 14 };
 
     REQUIRE_THAT(  //
-        dux::to_vector<int>(xform, in),
+        dux::into(std::vector<int>{}, xform, in),
         matchers::elements_are(2, 3, 5));
 }
 
@@ -112,7 +112,7 @@ TEST_CASE("drop", "[transducers]")
     const std::vector<int> in = { 2, 3, 5, 7, 9, 11, 12, 13, 14 };
 
     REQUIRE_THAT(  //
-        dux::to_vector<int>(xform, in),
+        dux::into(std::vector<int>{}, xform, in),
         matchers::elements_are(7, 9, 11, 12, 13, 14));
 }
 
@@ -122,7 +122,7 @@ TEST_CASE("stride", "[transducers]")
     const std::vector<int> in = { 2, 3, 5, 7, 9, 11, 12, 13, 14 };
 
     REQUIRE_THAT(  //
-        dux::to_vector<int>(xform, in),
+        dux::into(std::vector<int>{}, xform, in),
         matchers::elements_are(2, 7, 12));
 }
 
@@ -132,7 +132,7 @@ TEST_CASE("take_while", "[transducers]")
     const std::vector<int> in = { 2, 3, 5, 7, 9, 11, 12, 13, 14 };
 
     REQUIRE_THAT(  //
-        dux::to_vector<int>(xform, in),
+        dux::into(std::vector<int>{}, xform, in),
         matchers::elements_are(2, 3, 5, 7, 9));
 }
 
@@ -142,7 +142,7 @@ TEST_CASE("drop_while", "[transducers]")
     const std::vector<int> in = { 2, 3, 5, 7, 9, 11, 12, 13, 14 };
 
     REQUIRE_THAT(  //
-        dux::to_vector<int>(xform, in),
+        dux::into(std::vector<int>{}, xform, in),
         matchers::elements_are(11, 12, 13, 14));
 }
 
@@ -152,7 +152,7 @@ TEST_CASE("join", "[transducers]")
     const std::vector<std::string> in = { "Alpha", "Beta", "Gamma" };
 
     REQUIRE_THAT(  //
-        dux::push_back(std::string{}, xform, in),
+        dux::into(std::string{}, xform, in),
         matchers::equal_to("AlphaBetaGamma"));
 }
 
@@ -163,7 +163,7 @@ TEST_CASE("join_with", "[transducers]")
     const std::vector<std::string> in = { "Alpha", "Beta", "Gamma" };
 
     REQUIRE_THAT(  //
-        dux::push_back(std::string{}, xform, in),
+        dux::into(std::string{}, xform, in),
         matchers::equal_to("Alpha, Beta, Gamma"));
 }
 
@@ -173,7 +173,7 @@ TEST_CASE("intersperse", "[transducers]")
     const std::vector<int> in = { 2, 4, 6, 8 };
 
     REQUIRE_THAT(  //
-        dux::to_vector<int>(xform, in),
+        dux::into(std::vector<int>{}, xform, in),
         matchers::elements_are(2, -1, 4, -1, 6, -1, 8));
 }
 
@@ -189,7 +189,7 @@ TEST_CASE("transform_maybe", "[transducers]")
     const std::vector<int> in = { 1, 2, 3, 4, 5, 6 };
 
     REQUIRE_THAT(  //
-        dux::to_vector<std::string>(xform, in),
+        dux::into(std::vector<std::string>{}, xform, in),
         matchers::elements_are("2", "4", "6"));
 }
 
@@ -205,7 +205,7 @@ TEST_CASE("transform_maybe_i", "[transducers]")
     const std::vector<int> in = { 1, 2, 3, 4, 5, 6 };
 
     REQUIRE_THAT(  //
-        dux::to_vector<std::string>(xform, in),
+        dux::into(std::vector<std::string>{}, xform, in),
         matchers::elements_are("1", "3", "5"));
 }
 
@@ -216,7 +216,7 @@ TEST_CASE("inspect", "[transducers]")
 
     const std::vector<int> in = { 1, 2, 3, 4, 5, 6 };
 
-    dux::to_vector<int>(xform, in);
+    dux::into(std::vector<int>{}, xform, in);
 
     REQUIRE_THAT(  //
         ss.str(),
@@ -241,7 +241,7 @@ TEST_CASE("inspect_i", "[transducers]")
 
     const std::vector<int> in = { 1, 2, 3, 4, 5, 6 };
 
-    dux::to_vector<int>(xform, in);
+    dux::into(std::vector<int>{}, xform, in);
 
     REQUIRE_THAT(  //
         ss.str(),
@@ -259,7 +259,7 @@ TEST_CASE("compose", "[transducers]")
     const std::vector<int> in = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19 };
 
     REQUIRE_THAT(  //
-        dux::to_vector<std::string>(xform, in),
+        dux::into(std::vector<std::string>{}, xform, in),
         matchers::elements_are("10", "12", "14"));
 }
 
@@ -271,7 +271,7 @@ TEST_CASE("two inputs", "[transducers]")
     const std::string in2 = "ABCDEF";
 
     REQUIRE_THAT(  //
-        dux::to_vector<std::string>(xform, in1, in2),
+        dux::into(std::vector<std::string>{}, xform, in1, in2),
         matchers::elements_are("2A", "3B", "4C"));
 }
 
@@ -284,7 +284,7 @@ TEST_CASE("three inputs", "[transducers]")
     const std::string in3 = "+-+-+";
 
     REQUIRE_THAT(  //
-        dux::to_vector<std::string>(xform, in1, in2, in3),
+        dux::into(std::vector<std::string>{}, xform, in1, in2, in3),
         matchers::elements_are("2A+", "3B-", "4C+"));
 
     REQUIRE_THAT(  //

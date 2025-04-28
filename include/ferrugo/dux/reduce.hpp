@@ -1,6 +1,9 @@
 #pragma once
 
+#include <ferrugo/dux/output.hpp>
+#include <ferrugo/dux/to_tuple.hpp>
 #include <functional>
+#include <type_traits>
 
 namespace ferrugo
 {
@@ -9,36 +12,6 @@ namespace dux
 
 namespace detail
 {
-
-struct to_tuple_fn
-{
-    template <class Arg>
-    auto operator()(Arg&& arg) const -> Arg
-    {
-        return std::forward<Arg>(arg);
-    }
-
-    template <class... Args>
-    auto operator()(Args&&... args) const -> std::tuple<Args...>
-    {
-        return std::forward_as_tuple(std::forward<Args>(args)...);
-    }
-};
-
-static constexpr inline auto to_tuple = to_tuple_fn{};
-
-struct output_reducer_fn
-{
-    template <class Out, class... Args>
-    auto operator()(Out out, Args&&... args) const -> Out
-    {
-        *out = to_tuple(std::forward<Args>(args)...);
-        ++out;
-        return out;
-    }
-};
-
-static constexpr inline auto output_reducer = output_reducer_fn{};
 
 struct eq_fn
 {
@@ -134,14 +107,13 @@ struct copy_fn
     template <class Out, class Transducer, class... Ranges>
     auto operator()(Out out, Transducer&& transducer, Ranges&&... ranges) const -> Out
     {
-        return transduce(
-            std::move(out), std::forward<Transducer>(transducer), output_reducer, std::forward<Ranges>(ranges)...);
+        return transduce(std::move(out), std::forward<Transducer>(transducer), output, std::forward<Ranges>(ranges)...);
     }
 };
 
 static constexpr inline auto copy = copy_fn{};
 
-struct push_back_fn
+struct into_fn
 {
     template <class Result, class Transducer, class... Ranges>
     auto operator()(Result&& result, Transducer&& transducer, Ranges&&... ranges) const -> Result&&
@@ -151,20 +123,66 @@ struct push_back_fn
     }
 };
 
-static constexpr inline auto push_back = push_back_fn{};
+static constexpr inline auto into = into_fn{};
+
+template <class State, class Reducer>
+struct output_iterator
+{
+    using iterator_category = std::output_iterator_tag;
+    using value_type = void;
+    using reference = void;
+    using pointer = void;
+    using difference_type = void;
+
+    State m_state;
+    Reducer m_reducer;
+
+    output_iterator& operator*()
+    {
+        return *this;
+    }
+
+    output_iterator& operator++()
+    {
+        return *this;
+    }
+
+    output_iterator operator++(int)
+    {
+        return *this;
+    }
+
+    template <class... Args>
+    output_iterator& operator=(Args&&... args)
+    {
+        m_state = std::invoke(m_reducer, std::move(m_state), std::forward<Args>(args)...);
+        return *this;
+    }
+
+    operator State() const
+    {
+        return m_state;
+    }
+};
+
+struct reducer_to_output_iterator_fn
+{
+    template <class State, class Reducer>
+    auto operator()(State state, Reducer&& reducer) const -> output_iterator<State, std::decay_t<Reducer>>
+    {
+        return { std::move(state), std::forward<Reducer>(reducer) };
+    }
+};
+
+static constexpr inline auto reducer_to_output_iterator = detail::reducer_to_output_iterator_fn{};
 
 }  // namespace detail
 
 using detail::copy;
-using detail::push_back;
+using detail::into;
 using detail::reduce;
+using detail::reducer_to_output_iterator;
 using detail::transduce;
-
-template <class T, class Transducer, class... Ranges>
-auto to_vector(Transducer&& transducer, Ranges&&... ranges) -> std::vector<T>
-{
-    return push_back(std::vector<T>{}, std::forward<Transducer>(transducer), std::forward<Ranges>(ranges)...);
-}
 
 }  // namespace dux
 }  // namespace ferrugo

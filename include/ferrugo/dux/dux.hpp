@@ -1,9 +1,11 @@
 #pragma once
 
 #include <ferrugo/dux/compose.hpp>
+#include <ferrugo/dux/dev_null.hpp>
 #include <ferrugo/dux/drop.hpp>
 #include <ferrugo/dux/drop_while.hpp>
 #include <ferrugo/dux/filter.hpp>
+#include <ferrugo/dux/fork.hpp>
 #include <ferrugo/dux/inspect.hpp>
 #include <ferrugo/dux/intersperse.hpp>
 #include <ferrugo/dux/join.hpp>
