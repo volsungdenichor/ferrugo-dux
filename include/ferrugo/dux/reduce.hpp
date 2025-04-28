@@ -90,8 +90,8 @@ static constexpr inline auto reduce = reduce_fn{};
 
 struct transduce_fn
 {
-    template <class State, class Transducer, class Reducer, class... Ranges>
-    auto operator()(State state, Transducer&& transducer, Reducer&& reducer, Ranges&&... ranges) const -> State
+    template <class State, class Reducer, class Transducer, class... Ranges>
+    auto operator()(State state, Reducer&& reducer, Transducer&& transducer, Ranges&&... ranges) const -> State
     {
         return reduce(
             std::move(state),
@@ -107,7 +107,7 @@ struct copy_fn
     template <class Out, class Transducer, class... Ranges>
     auto operator()(Out out, Transducer&& transducer, Ranges&&... ranges) const -> Out
     {
-        return transduce(std::move(out), std::forward<Transducer>(transducer), output, std::forward<Ranges>(ranges)...);
+        return transduce(std::move(out), output, std::forward<Transducer>(transducer), std::forward<Ranges>(ranges)...);
     }
 };
 
