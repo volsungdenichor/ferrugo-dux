@@ -41,6 +41,45 @@ struct delimit
     }
 };
 
+static constexpr inline struct min_value_fn
+{
+    template <class T>
+    constexpr const T& operator()(const T& lhs, const T& rhs) const
+    {
+        return std::min(lhs, rhs);
+    }
+} min_value;
+
+static constexpr inline struct max_value_fn
+{
+    template <class T>
+    constexpr const T& operator()(const T& lhs, const T& rhs) const
+    {
+        return std::max(lhs, rhs);
+    }
+} max_value;
+
+TEST_CASE("reduce", "[reducers]")
+{
+    const std::vector<int> in = { 2, 3, 5, 7, 9, 11, 12, 13, 14 };
+
+    REQUIRE_THAT(  //
+        dux::reduce(0, std::plus{}, in),
+        matchers::equal_to(76));
+
+    REQUIRE_THAT(  //
+        dux::reduce(1, std::multiplies{}, in),
+        matchers::equal_to(45'405'360));
+
+    REQUIRE_THAT(  //
+        dux::reduce(std::numeric_limits<int>::max(), min_value, in),
+        matchers::equal_to(2));
+
+    REQUIRE_THAT(  //
+        dux::reduce(std::numeric_limits<int>::min(), max_value, in),
+        matchers::equal_to(14));
+}
+
 TEST_CASE("transform", "[transducers]")
 {
     const auto xform = dux::transform(str);
@@ -83,7 +122,7 @@ TEST_CASE("filter", "[transducers]")
         matchers::elements_are(2, 12, 14));
 
     REQUIRE_THAT(  //
-        dux::transduce(0, std::plus<>{}, xform, in),
+        dux::transduce(0, std::plus{}, xform, in),
         matchers::equal_to(28));
 }
 
