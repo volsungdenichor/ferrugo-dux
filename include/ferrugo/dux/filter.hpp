@@ -1,7 +1,6 @@
 #pragma once
 
-#include <ferrugo/dux/transducer_interface.hpp>
-#include <functional>
+#include <ferrugo/dux/interfaces.hpp>
 
 namespace ferrugo
 {
@@ -56,9 +55,10 @@ struct filter_fn
         Pred m_pred;
 
         template <class Reducer>
-        constexpr auto operator()(Reducer&& next_reducer) const -> reducer_t<Indexed, std::decay_t<Reducer>, Pred>
+        constexpr auto operator()(Reducer&& next_reducer) const
+            -> reducer_interface_t<reducer_t<Indexed, std::decay_t<Reducer>, Pred>>
         {
-            return { std::forward<Reducer>(next_reducer), m_pred };
+            return { { std::forward<Reducer>(next_reducer), m_pred } };
         }
     };
 

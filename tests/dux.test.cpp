@@ -11,6 +11,7 @@ std::string uppercase(std::string text)
     std::transform(text.begin(), text.end(), text.begin(), [](char ch) { return std::toupper(ch); });
     return text;
 }
+
 }  // namespace
 
 using namespace ferrugo;
@@ -261,6 +262,35 @@ TEST_CASE("compose", "[transducers]")
     REQUIRE_THAT(  //
         dux::into(std::vector<std::string>{}, xform, in),
         matchers::elements_are("10", "12", "14"));
+}
+
+TEST_CASE("compose transducers with pipe operator", "[transducers]")
+{
+    const auto xform = dux::filter([](int x) { return x % 2 == 0; })                         //
+                       | dux::transform(str)                                                 //
+                       | dux::drop_while([](const std::string& x) { return x.size() < 2; })  //
+                       | dux::take(3);
+
+    const std::vector<int> in = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19 };
+
+    REQUIRE_THAT(  //
+        dux::into(std::vector<std::string>{}, xform, in),
+        matchers::elements_are("10", "12", "14"));
+}
+
+TEST_CASE("reduce with pipe operator", "[transducers]")
+{
+    const auto reducer = dux::filter([](int x) { return x % 2 == 0; })                         //
+                         | dux::transform(str)                                                 //
+                         | dux::drop_while([](const std::string& x) { return x.size() < 2; })  //
+                         | dux::take(3)                                                        //
+                         | delimit{ "|" };
+
+    const std::vector<int> in = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19 };
+
+    REQUIRE_THAT(  //
+        dux::reduce(std::string{}, reducer, in),
+        matchers::equal_to("10|12|14"));
 }
 
 TEST_CASE("two inputs", "[transducers]")

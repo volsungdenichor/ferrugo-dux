@@ -1,6 +1,6 @@
 #pragma once
 
-#include <ferrugo/dux/transducer_interface.hpp>
+#include <ferrugo/dux/interfaces.hpp>
 #include <tuple>
 
 namespace ferrugo
@@ -51,19 +51,19 @@ struct compose_fn
 {
 private:
     template <class Pipe>
-    constexpr auto to_tuple(Pipe pipe) const -> std::tuple<Pipe>
+    static constexpr auto to_tuple(Pipe pipe) -> std::tuple<Pipe>
     {
         return std::tuple<Pipe>{ std::move(pipe) };
     }
 
     template <class... Pipes>
-    constexpr auto to_tuple(compose_t<Pipes...> pipe) const -> std::tuple<Pipes...>
+    static constexpr auto to_tuple(compose_t<Pipes...> pipe) -> std::tuple<Pipes...>
     {
         return pipe.m_pipes;
     }
 
     template <class... Pipes>
-    constexpr auto from_tuple(std::tuple<Pipes...> tuple) const -> compose_t<Pipes...>
+    static constexpr auto from_tuple(std::tuple<Pipes...> tuple) -> compose_t<Pipes...>
     {
         return compose_t<Pipes...>{ std::move(tuple) };
     }
@@ -82,9 +82,9 @@ public:
 static constexpr inline auto compose = detail::compose_fn{};
 
 template <class L, class R>
-constexpr auto operator>>=(transducer_interface_t<L> lhs, transducer_interface_t<R> rhs)
+constexpr auto operator|(transducer_interface_t<L> lhs, transducer_interface_t<R> rhs)
 {
-    return compose(std::move(lhs), std::move(rhs));
+    return transducer_interface_t{ compose(std::move(lhs.m_impl), std::move(rhs.m_impl)) };
 }
 
 }  // namespace dux

@@ -1,5 +1,6 @@
 #pragma once
 
+#include <ferrugo/dux/interfaces.hpp>
 #include <ferrugo/dux/to_tuple.hpp>
 
 namespace ferrugo
@@ -12,7 +13,7 @@ namespace detail
 struct output_fn
 {
     template <class Out, class... Args>
-    auto operator()(Out out, Args&&... args) const -> Out
+    constexpr auto operator()(Out out, Args&&... args) const -> Out
     {
         *out = to_tuple(std::forward<Args>(args)...);
         ++out;
@@ -22,7 +23,7 @@ struct output_fn
 
 }  // namespace detail
 
-static constexpr inline auto output = detail::output_fn{};
+static constexpr inline auto output = reducer_interface_t{ detail::output_fn{} };
 
 }  // namespace dux
 }  // namespace ferrugo

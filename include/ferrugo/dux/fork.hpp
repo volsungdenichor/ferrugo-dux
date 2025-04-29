@@ -1,5 +1,6 @@
 #pragma once
 
+#include <ferrugo/dux/interfaces.hpp>
 #include <type_traits>
 
 namespace ferrugo
@@ -36,9 +37,9 @@ struct fork_fn
     };
 
     template <class... Reducers>
-    auto operator()(Reducers&&... reducers) const -> reducer_t<std::decay_t<Reducers>...>
+    auto operator()(Reducers&&... reducers) const -> reducer_interface_t<reducer_t<std::decay_t<Reducers>...>>
     {
-        return { std::tuple<std::decay_t<Reducers>...>{ std::forward<Reducers>(reducers)... } };
+        return { { std::tuple<std::decay_t<Reducers>...>{ std::forward<Reducers>(reducers)... } } };
     }
 };
 

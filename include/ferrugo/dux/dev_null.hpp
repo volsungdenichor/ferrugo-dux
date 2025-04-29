@@ -1,5 +1,7 @@
 #pragma once
 
+#include <ferrugo/dux/interfaces.hpp>
+
 namespace ferrugo
 {
 namespace dux
@@ -19,7 +21,7 @@ struct dev_null_fn
 
 }  // namespace detail
 
-static constexpr inline auto dev_null = detail::dev_null_fn{};
+static constexpr inline auto dev_null = reducer_interface_t{ detail::dev_null_fn{} };
 
 }  // namespace dux
 }  // namespace ferrugo

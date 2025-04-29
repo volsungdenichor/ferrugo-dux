@@ -1,6 +1,6 @@
 #pragma once
 
-#include <ferrugo/dux/transducer_interface.hpp>
+#include <ferrugo/dux/interfaces.hpp>
 
 namespace ferrugo
 {
@@ -38,9 +38,10 @@ struct intersperse_fn
         Delimiter m_delimiter;
 
         template <class Reducer>
-        constexpr auto operator()(Reducer&& next_reducer) const -> reducer_t<std::decay_t<Reducer>, Delimiter>
+        constexpr auto operator()(Reducer&& next_reducer) const
+            -> reducer_interface_t<reducer_t<std::decay_t<Reducer>, Delimiter>>
         {
-            return { std::forward<Reducer>(next_reducer), m_delimiter };
+            return { { std::forward<Reducer>(next_reducer), m_delimiter } };
         }
     };
 
