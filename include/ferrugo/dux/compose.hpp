@@ -1,6 +1,6 @@
 #pragma once
 
-#include <functional>
+#include <ferrugo/dux/transducer_interface.hpp>
 #include <tuple>
 
 namespace ferrugo
@@ -80,6 +80,12 @@ public:
 }  // namespace detail
 
 static constexpr inline auto compose = detail::compose_fn{};
+
+template <class L, class R>
+constexpr auto operator>>=(transducer_interface_t<L> lhs, transducer_interface_t<R> rhs)
+{
+    return compose(std::move(lhs), std::move(rhs));
+}
 
 }  // namespace dux
 }  // namespace ferrugo

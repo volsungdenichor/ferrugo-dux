@@ -1,6 +1,6 @@
 #pragma once
 
-#include <cstddef>
+#include <ferrugo/dux/transducer_interface.hpp>
 
 namespace ferrugo
 {
@@ -37,9 +37,9 @@ struct stride_fn
         }
     };
 
-    constexpr auto operator()(std::ptrdiff_t count) const -> transducer_t
+    constexpr auto operator()(std::ptrdiff_t count) const -> transducer_interface_t<transducer_t>
     {
-        return { count };
+        return { { count } };
     }
 };
 

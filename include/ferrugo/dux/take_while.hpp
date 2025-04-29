@@ -1,6 +1,6 @@
 #pragma once
 
-#include <functional>
+#include <ferrugo/dux/transducer_interface.hpp>
 
 namespace ferrugo
 {
@@ -39,9 +39,9 @@ struct take_while_fn
     };
 
     template <class Pred>
-    constexpr auto operator()(Pred&& pred) const -> transducer_t<std::decay_t<Pred>>
+    constexpr auto operator()(Pred&& pred) const -> transducer_interface_t<transducer_t<std::decay_t<Pred>>>
     {
-        return { std::forward<Pred>(pred) };
+        return { { std::forward<Pred>(pred) } };
     }
 };
 }  // namespace detail

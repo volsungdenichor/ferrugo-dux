@@ -1,5 +1,6 @@
 #pragma once
 
+#include <ferrugo/dux/transducer_interface.hpp>
 #include <functional>
 
 namespace ferrugo
@@ -57,9 +58,9 @@ struct inspect_fn
     };
 
     template <class Func>
-    constexpr auto operator()(Func&& func) const -> transducer_t<std::decay_t<Func>>
+    constexpr auto operator()(Func&& func) const -> transducer_interface_t<transducer_t<std::decay_t<Func>>>
     {
-        return { std::forward<Func>(func) };
+        return { { std::forward<Func>(func) } };
     }
 };
 

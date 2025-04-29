@@ -1,6 +1,6 @@
 #pragma once
 
-#include <functional>
+#include <ferrugo/dux/transducer_interface.hpp>
 
 namespace ferrugo
 {
@@ -55,9 +55,9 @@ struct transform_fn
     };
 
     template <class Func>
-    constexpr auto operator()(Func&& func) const -> transducer_t<std::decay_t<Func>>
+    constexpr auto operator()(Func&& func) const -> transducer_interface_t<transducer_t<std::decay_t<Func>>>
     {
-        return { std::forward<Func>(func) };
+        return { { std::forward<Func>(func) } };
     }
 };
 
@@ -65,5 +65,6 @@ struct transform_fn
 
 static constexpr inline auto transform = detail::transform_fn<false>{};
 static constexpr inline auto transform_i = detail::transform_fn<true>{};
+
 }  // namespace dux
 }  // namespace ferrugo

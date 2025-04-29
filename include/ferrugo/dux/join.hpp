@@ -1,6 +1,6 @@
 #pragma once
 
-#include <functional>
+#include <ferrugo/dux/transducer_interface.hpp>
 
 namespace ferrugo
 {
@@ -53,9 +53,9 @@ struct join_with_fn
     };
 
     template <class Delimiter>
-    constexpr auto operator()(Delimiter&& delimiter) const -> transducer_t<std::decay_t<Delimiter>>
+    constexpr auto operator()(Delimiter&& delimiter) const -> transducer_interface_t<transducer_t<std::decay_t<Delimiter>>>
     {
-        return { std::forward<Delimiter>(delimiter) };
+        return { { std::forward<Delimiter>(delimiter) } };
     }
 };
 
