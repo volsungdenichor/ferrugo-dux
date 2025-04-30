@@ -102,86 +102,22 @@ struct transduce_fn
 
 static constexpr inline auto transduce = transduce_fn{};
 
-struct copy_fn
-{
-    template <class Out, class Transducer, class... Ranges>
-    auto operator()(Out out, Transducer&& transducer, Ranges&&... ranges) const -> Out
-    {
-        return transduce(std::move(out), output, std::forward<Transducer>(transducer), std::forward<Ranges>(ranges)...);
-    }
-};
-
-static constexpr inline auto copy = copy_fn{};
-
 struct into_fn
 {
     template <class Result, class Transducer, class... Ranges>
     auto operator()(Result&& result, Transducer&& transducer, Ranges&&... ranges) const -> Result&&
     {
-        copy(std::back_inserter(result), std::forward<Transducer>(transducer), std::forward<Ranges>(ranges)...);
+        transduce(std::back_inserter(result), output, std::forward<Transducer>(transducer), std::forward<Ranges>(ranges)...);
         return std::forward<Result>(result);
     }
 };
 
 static constexpr inline auto into = into_fn{};
 
-template <class State, class Reducer>
-struct output_iterator
-{
-    using iterator_category = std::output_iterator_tag;
-    using value_type = void;
-    using reference = void;
-    using pointer = void;
-    using difference_type = void;
-
-    State m_state;
-    Reducer m_reducer;
-
-    output_iterator& operator*()
-    {
-        return *this;
-    }
-
-    output_iterator& operator++()
-    {
-        return *this;
-    }
-
-    output_iterator operator++(int)
-    {
-        return *this;
-    }
-
-    template <class... Args>
-    output_iterator& operator=(Args&&... args)
-    {
-        m_state = std::invoke(m_reducer, std::move(m_state), std::forward<Args>(args)...);
-        return *this;
-    }
-
-    operator State() const
-    {
-        return m_state;
-    }
-};
-
-struct reducer_to_output_iterator_fn
-{
-    template <class State, class Reducer>
-    auto operator()(State state, Reducer&& reducer) const -> output_iterator<State, std::decay_t<Reducer>>
-    {
-        return { std::move(state), std::forward<Reducer>(reducer) };
-    }
-};
-
-static constexpr inline auto reducer_to_output_iterator = detail::reducer_to_output_iterator_fn{};
-
 }  // namespace detail
 
-using detail::copy;
 using detail::into;
 using detail::reduce;
-using detail::reducer_to_output_iterator;
 using detail::transduce;
 
 }  // namespace dux

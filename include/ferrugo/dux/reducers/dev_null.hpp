@@ -13,7 +13,7 @@ namespace detail
 struct dev_null_fn
 {
     template <class State, class... Args>
-    auto operator()(State state, Args&&... args) const -> State
+    constexpr auto operator()(State state, Args&&... args) const -> State
     {
         return state;
     }

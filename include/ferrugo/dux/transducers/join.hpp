@@ -82,7 +82,7 @@ struct join_fn
 };
 }  // namespace detail
 
-static constexpr inline auto join = detail::join_fn{};
+static constexpr inline auto join = transducer_interface_t{ detail::join_fn{} };
 static constexpr inline auto join_with = detail::join_with_fn{};
 
 }  // namespace dux

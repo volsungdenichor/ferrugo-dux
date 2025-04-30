@@ -23,7 +23,7 @@ struct filter_fn
         template <class State, class... Args>
         constexpr auto operator()(State state, Args&&... args) const -> State
         {
-            if (std::invoke(m_pred, std::forward<Args>(args)...))
+            if (std::invoke(m_pred, args...))
             {
                 return m_next_reducer(std::move(state), std::forward<Args>(args)...);
             }
@@ -41,7 +41,7 @@ struct filter_fn
         template <class State, class... Args>
         constexpr auto operator()(State state, Args&&... args) const -> State
         {
-            if (std::invoke(m_pred, m_index++, std::forward<Args>(args)...))
+            if (std::invoke(m_pred, m_index++, args...))
             {
                 return m_next_reducer(std::move(state), std::forward<Args>(args)...);
             }

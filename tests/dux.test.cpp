@@ -376,3 +376,21 @@ TEST_CASE("composition", "[transducers]")
             in),
         matchers::equal_to("20, 40"));
 }
+
+TEST_CASE("fork", "[transducers]")
+{
+    const std::vector<int> in = { 2, 3, 5, 6, 7, 9 };
+
+    REQUIRE_THAT(     //
+        dux::reduce(  //
+            std::string{},
+            dux::fork(                                         //
+                dux::filter([](int x) { return x % 2 == 0; })  //
+                    | delimit{ ", " },
+                dux::filter([](int x) { return x % 2 == 1; })                 //
+                    | dux::transform([](int x) { return 10 * x; })            //
+                    | dux::transform([](int x) { return str('[', x, ']'); })  //
+                    | delimit{ "" }),
+            in),
+        matchers::equal_to("2[30][50], 6[70][90]"));
+}

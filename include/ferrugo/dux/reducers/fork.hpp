@@ -37,7 +37,7 @@ struct fork_fn
     };
 
     template <class... Reducers>
-    auto operator()(Reducers&&... reducers) const -> reducer_interface_t<reducer_t<std::decay_t<Reducers>...>>
+    constexpr auto operator()(Reducers&&... reducers) const -> reducer_interface_t<reducer_t<std::decay_t<Reducers>...>>
     {
         return { { std::tuple<std::decay_t<Reducers>...>{ std::forward<Reducers>(reducers)... } } };
     }
