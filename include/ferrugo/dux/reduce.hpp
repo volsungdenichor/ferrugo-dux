@@ -1,6 +1,6 @@
 #pragma once
 
-#include <ferrugo/dux/output.hpp>
+#include <ferrugo/dux/reducers/output.hpp>
 #include <ferrugo/dux/to_tuple.hpp>
 #include <functional>
 #include <type_traits>

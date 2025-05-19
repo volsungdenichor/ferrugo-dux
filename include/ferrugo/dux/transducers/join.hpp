@@ -9,9 +9,11 @@ namespace dux
 namespace detail
 {
 
-template <class Iter, class State, class BinaryOp>
-constexpr auto accumulate(Iter begin, Iter end, State state, BinaryOp&& op) -> State
+template <class Range, class State, class BinaryOp>
+constexpr auto accumulate(Range&& range, State state, BinaryOp&& op) -> State
 {
+    auto begin = std::begin(range);
+    const auto end = std::end(range);
     for (; begin != end; ++begin)
     {
         state = std::invoke(op, std::move(state), *begin);
@@ -33,10 +35,10 @@ struct join_with_fn
         {
             if (!m_first_item)
             {
-                state = accumulate(std::begin(m_delimiter), std::end(m_delimiter), std::move(state), m_next_reducer);
+                state = accumulate(m_delimiter, std::move(state), m_next_reducer);
             }
             m_first_item = false;
-            return accumulate(std::begin(arg), std::end(arg), std::move(state), m_next_reducer);
+            return accumulate(arg, std::move(state), m_next_reducer);
         }
     };
 
@@ -70,7 +72,7 @@ struct join_fn
         template <class State, class Arg>
         constexpr auto operator()(State state, Arg&& arg) const -> State
         {
-            return accumulate(std::begin(arg), std::end(arg), std::move(state), m_next_reducer);
+            return accumulate(arg, std::move(state), m_next_reducer);
         }
     };
 
