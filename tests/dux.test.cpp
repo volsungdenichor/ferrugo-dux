@@ -64,19 +64,19 @@ TEST_CASE("reduce", "[reducers]")
     const std::vector<int> in = { 2, 3, 5, 7, 9, 11, 12, 13, 14 };
 
     REQUIRE_THAT(  //
-        dux::reduce(0, std::plus{}, in),
+        dux::reduce(0, std::plus{})(in),
         matchers::equal_to(76));
 
     REQUIRE_THAT(  //
-        dux::reduce(1, std::multiplies{}, in),
+        dux::reduce(1, std::multiplies{})(in),
         matchers::equal_to(45'405'360));
 
     REQUIRE_THAT(  //
-        dux::reduce(std::numeric_limits<int>::max(), min_value, in),
+        dux::reduce(std::numeric_limits<int>::max(), min_value)(in),
         matchers::equal_to(2));
 
     REQUIRE_THAT(  //
-        dux::reduce(std::numeric_limits<int>::min(), max_value, in),
+        dux::reduce(std::numeric_limits<int>::min(), max_value)(in),
         matchers::equal_to(14));
 }
 
@@ -94,7 +94,7 @@ TEST_CASE("transform", "[transducers]")
         matchers::elements_are("2", "3", "5", "7", "9", "11"));
 
     REQUIRE_THAT(  //
-        dux::transduce(std::string{}, delimit{ ", " }, xform, in),
+        dux::reduce(std::string{}, xform | delimit{ ", " })(in),
         matchers::equal_to("2, 3, 5, 7, 9, 11"));
 }
 
@@ -108,7 +108,7 @@ TEST_CASE("transform_i", "[transducers]")
         matchers::elements_are("0. 2", "1. 3", "2. 5", "3. 7", "4. 9", "5. 11"));
 
     REQUIRE_THAT(  //
-        dux::transduce(std::string{}, delimit{ ", " }, xform, in),
+        dux::reduce(std::string{}, xform | delimit{ ", " })(in),
         matchers::equal_to("0. 2, 1. 3, 2. 5, 3. 7, 4. 9, 5. 11"));
 }
 
@@ -122,7 +122,7 @@ TEST_CASE("filter", "[transducers]")
         matchers::elements_are(2, 12, 14));
 
     REQUIRE_THAT(  //
-        dux::transduce(0, std::plus{}, xform, in),
+        dux::reduce(0, xform | std::plus{})(in),
         matchers::equal_to(28));
 }
 
@@ -328,7 +328,7 @@ TEST_CASE("reduce with pipe operator", "[transducers]")
     const std::vector<int> in = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19 };
 
     REQUIRE_THAT(  //
-        dux::reduce(std::string{}, reducer, in),
+        dux::reduce(std::string{}, reducer)(in),
         matchers::equal_to("10|12|14"));
 }
 
@@ -352,12 +352,10 @@ TEST_CASE("three inputs", "[transducers]")
     const std::string in2 = "ABCDEF";
     const std::string in3 = "+-+-+";
 
-    REQUIRE_THAT(  //
-        dux::into(std::vector<std::string>{}, xform, in1, in2, in3),
-        matchers::elements_are("2A+", "3B-", "4C+"));
+    REQUIRE_THAT(dux::into(std::vector<std::string>{}, xform, in1, in2, in3), matchers::elements_are("2A+", "3B-", "4C+"));
 
     REQUIRE_THAT(  //
-        dux::transduce(std::string{}, delimit{ "/" }, xform, in1, in2, in3),
+        dux::reduce(std::string{}, xform | delimit{ "/" })(in1, in2, in3),
         matchers::equal_to("2A+/3B-/4C+"));
 }
 
@@ -372,8 +370,7 @@ TEST_CASE("composition", "[transducers]")
                 dux::filter([](int x) { return x % 2 == 0; }),
                 dux::transform([](int x) { return 10 * x; }),
                 dux::transform(str),
-                dux::take(2))(delimit{ ", " }),
-            in),
+                dux::take(2))(delimit{ ", " }))(in),
         matchers::equal_to("20, 40"));
 }
 
@@ -390,7 +387,6 @@ TEST_CASE("fork", "[transducers]")
                 dux::filter([](int x) { return x % 2 == 1; })                 //
                     | dux::transform([](int x) { return 10 * x; })            //
                     | dux::transform([](int x) { return str('[', x, ']'); })  //
-                    | delimit{ "" }),
-            in),
+                    | delimit{ "" }))(in),
         matchers::equal_to("2[30][50], 6[70][90]"));
 }

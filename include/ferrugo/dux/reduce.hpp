@@ -13,101 +13,99 @@ namespace dux
 namespace detail
 {
 
-struct eq_fn
+static constexpr inline struct eq_fn
 {
-    template <class Iter, std::size_t... I>
-    static bool call(const Iter& lhs, const Iter& rhs, std::index_sequence<I...>)
-    {
-        return (... || (std::get<I>(lhs) == std::get<I>(rhs)));
-    }
-
     template <class Iter>
     bool operator()(const Iter& lhs, const Iter& rhs) const
     {
         return call(lhs, rhs, std::make_index_sequence<std::tuple_size_v<Iter>>{});
     }
-};
 
-struct inc_fn
-{
+private:
     template <class Iter, std::size_t... I>
-    static void call(Iter& it, std::index_sequence<I...>)
+    static bool call(const Iter& lhs, const Iter& rhs, std::index_sequence<I...>)
     {
-        (++std::get<I>(it), ...);
+        return (... || (std::get<I>(lhs) == std::get<I>(rhs)));
     }
+} eq;
 
-    template <class Iter>
-    void operator()(Iter& it) const
-    {
-        call(it, std::make_index_sequence<std::tuple_size_v<Iter>>{});
-    }
-};
-
-static constexpr inline auto eq = eq_fn{};
-static constexpr inline auto inc = inc_fn{};
-
-struct invoke_reducer_fn
+template <class Iter>
+void inc(Iter& iter)
 {
-    template <class Reducer, class State, class Iter, std::size_t... I>
-    static auto call(Reducer& reducer, State state, Iter it, std::index_sequence<I...>) -> State
-    {
-        return std::invoke(reducer, std::move(state), *std::get<I>(it)...);
-    }
+    std::apply([](auto&... it) { (++it, ...); }, iter);
+}
 
+static constexpr inline struct invoke_reducer_fn
+{
     template <class Reducer, class State, class Iter>
-    auto operator()(Reducer& reducer, State state, Iter it) const -> State
+    auto operator()(Reducer&& reducer, State state, Iter it) const -> State
     {
-        return call(reducer, std::move(state), it, std::make_index_sequence<std::tuple_size_v<Iter>>{});
+        return call(
+            std::forward<Reducer>(reducer), std::move(state), it, std::make_index_sequence<std::tuple_size_v<Iter>>{});
     }
-};
 
-static constexpr inline auto invoke_reducer = invoke_reducer_fn{};
+private:
+    template <class Reducer, class State, class Iter, std::size_t... I>
+    static auto call(Reducer&& reducer, State state, Iter it, std::index_sequence<I...>) -> State
+    {
+        return std::invoke(std::forward<Reducer>(reducer), std::move(state), *std::get<I>(it)...);
+    }
+} invoke_reducer;
 
 struct reduce_fn
 {
-    template <class State, class Reducer, class Iter>
-    static auto call(State state, Reducer&& reducer, Iter begin, Iter end) -> State
+    template <class State, class Reducer>
+    struct proxy_t
     {
-        for (Iter it = begin; !eq(it, end); inc(it))
-        {
-            state = invoke_reducer(reducer, std::move(state), it);
-        }
-        return state;
-    }
+        State m_state;
+        Reducer m_reducer;
 
-    template <class State, class Reducer, class... Ranges>
-    auto operator()(State state, Reducer&& reducer, Ranges&&... ranges) const -> State
+        template <class... Ranges>
+        auto operator()(Ranges&&... ranges) const -> State
+        {
+            State state = m_state;
+            const auto begin = std::tuple{ std::begin(ranges)... };
+            const auto end = std::tuple{ std::end(ranges)... };
+            for (auto it = begin; !eq(it, end); inc(it))
+            {
+                state = invoke_reducer(m_reducer, std::move(state), it);
+            }
+            return state;
+        }
+    };
+
+    template <class State, class Reducer>
+    constexpr auto operator()(State state, Reducer&& reducer) const -> proxy_t<State, std::decay_t<Reducer>>
     {
-        return call(
-            std::move(state),
-            std::forward<Reducer>(reducer),
-            std::tuple{ std::begin(ranges)... },
-            std::tuple{ std::end(ranges)... });
+        return { std::move(state), std::forward<Reducer>(reducer) };
     }
 };
 
 static constexpr inline auto reduce = reduce_fn{};
 
-struct transduce_fn
+struct copy_fn
 {
-    template <class State, class Reducer, class Transducer, class... Ranges>
-    auto operator()(State state, Reducer&& reducer, Transducer&& transducer, Ranges&&... ranges) const -> State
+    template <class Out>
+    constexpr auto operator()(Out out) const
     {
-        return reduce(
-            std::move(state),
-            std::invoke(std::forward<Transducer>(transducer), std::forward<Reducer>(reducer)),
-            std::forward<Ranges>(ranges)...);
+        return reduce(std::move(out), output);
+    }
+
+    template <class Out, class Transducer>
+    constexpr auto operator()(Out out, Transducer&& transducer) const
+    {
+        return reduce(std::move(out), std::invoke(std::forward<Transducer>(transducer), output));
     }
 };
 
-static constexpr inline auto transduce = transduce_fn{};
+static constexpr inline auto copy = copy_fn{};
 
 struct into_fn
 {
     template <class Result, class Transducer, class... Ranges>
     auto operator()(Result&& result, Transducer&& transducer, Ranges&&... ranges) const -> Result&&
     {
-        transduce(std::back_inserter(result), output, std::forward<Transducer>(transducer), std::forward<Ranges>(ranges)...);
+        copy(std::back_inserter(result), std::forward<Transducer>(transducer))(std::forward<Ranges>(ranges)...);
         return std::forward<Result>(result);
     }
 };
@@ -116,9 +114,9 @@ static constexpr inline auto into = into_fn{};
 
 }  // namespace detail
 
+using detail::copy;
 using detail::into;
 using detail::reduce;
-using detail::transduce;
 
 }  // namespace dux
 }  // namespace ferrugo
