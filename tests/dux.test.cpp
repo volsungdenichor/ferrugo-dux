@@ -68,7 +68,15 @@ TEST_CASE("reduce", "[reducers]")
         matchers::equal_to(76));
 
     REQUIRE_THAT(  //
+        in | dux::reduce(0, std::plus{}),
+        matchers::equal_to(76));
+
+    REQUIRE_THAT(  //
         dux::reduce(1, std::multiplies{})(in),
+        matchers::equal_to(45'405'360));
+
+    REQUIRE_THAT(  //
+        in | dux::reduce(1, std::multiplies{}),
         matchers::equal_to(45'405'360));
 
     REQUIRE_THAT(  //
@@ -110,6 +118,10 @@ TEST_CASE("transform_i", "[transducers]")
     REQUIRE_THAT(  //
         dux::reduce(std::string{}, xform | delimit{ ", " })(in),
         matchers::equal_to("0. 2, 1. 3, 2. 5, 3. 7, 4. 9, 5. 11"));
+
+    REQUIRE_THAT(  //
+        in | dux::reduce(std::string{}, xform | delimit{ ", " }),
+        matchers::equal_to("0. 2, 1. 3, 2. 5, 3. 7, 4. 9, 5. 11"));
 }
 
 TEST_CASE("filter", "[transducers]")
@@ -123,6 +135,10 @@ TEST_CASE("filter", "[transducers]")
 
     REQUIRE_THAT(  //
         dux::reduce(0, xform | std::plus{})(in),
+        matchers::equal_to(28));
+
+    REQUIRE_THAT(  //
+        in | dux::reduce(0, xform | std::plus{}),
         matchers::equal_to(28));
 }
 
@@ -330,6 +346,10 @@ TEST_CASE("reduce with pipe operator", "[transducers]")
     REQUIRE_THAT(  //
         dux::reduce(std::string{}, reducer)(in),
         matchers::equal_to("10|12|14"));
+
+    REQUIRE_THAT(  //
+        in | dux::reduce(std::string{}, reducer),
+        matchers::equal_to("10|12|14"));
 }
 
 TEST_CASE("two inputs", "[transducers]")
@@ -357,6 +377,10 @@ TEST_CASE("three inputs", "[transducers]")
     REQUIRE_THAT(  //
         dux::reduce(std::string{}, xform | delimit{ "/" })(in1, in2, in3),
         matchers::equal_to("2A+/3B-/4C+"));
+
+    REQUIRE_THAT(  //
+        std::tie(in1, in2, in3) | dux::reduce(std::string{}, xform | delimit{ "/" }),
+        matchers::equal_to("2A+/3B-/4C+"));
 }
 
 TEST_CASE("composition", "[transducers]")
@@ -371,6 +395,17 @@ TEST_CASE("composition", "[transducers]")
                 dux::transform([](int x) { return 10 * x; }),
                 dux::transform(str),
                 dux::take(2))(delimit{ ", " }))(in),
+        matchers::equal_to("20, 40"));
+
+    REQUIRE_THAT(  //
+        in
+            | dux::reduce(
+                std::string{},
+                dux::compose(
+                    dux::filter([](int x) { return x % 2 == 0; }),
+                    dux::transform([](int x) { return 10 * x; }),
+                    dux::transform(str),
+                    dux::take(2))(delimit{ ", " })),
         matchers::equal_to("20, 40"));
 }
 
@@ -388,5 +423,18 @@ TEST_CASE("fork", "[transducers]")
                     | dux::transform([](int x) { return 10 * x; })            //
                     | dux::transform([](int x) { return str('[', x, ']'); })  //
                     | delimit{ "" }))(in),
+        matchers::equal_to("2[30][50], 6[70][90]"));
+
+    REQUIRE_THAT(  //
+        in
+            | dux::reduce(  //
+                std::string{},
+                dux::fork(                                         //
+                    dux::filter([](int x) { return x % 2 == 0; })  //
+                        | delimit{ ", " },
+                    dux::filter([](int x) { return x % 2 == 1; })                 //
+                        | dux::transform([](int x) { return 10 * x; })            //
+                        | dux::transform([](int x) { return str('[', x, ']'); })  //
+                        | delimit{ "" })),
         matchers::equal_to("2[30][50], 6[70][90]"));
 }

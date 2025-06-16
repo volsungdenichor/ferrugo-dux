@@ -72,6 +72,24 @@ struct reduce_fn
             }
             return state;
         }
+
+        template <class Range>
+        friend auto operator|(Range&& range, const proxy_t& proxy) -> State
+        {
+            return proxy(std::forward<Range>(range));
+        }
+
+        template <class... Ranges>
+        friend auto operator|(const std::tuple<Ranges...>& ranges, const proxy_t& proxy) -> State
+        {
+            return std::apply(proxy, ranges);
+        }
+
+        template <class... Ranges>
+        friend auto operator|(std::tuple<Ranges...>&& ranges, const proxy_t& proxy) -> State
+        {
+            return std::apply(proxy, std::move(ranges));
+        }
     };
 
     template <class State, class Reducer>
