@@ -407,6 +407,17 @@ TEST_CASE("composition", "[transducers]")
                     dux::transform(str),
                     dux::take(2))(delimit{ ", " })),
         matchers::equal_to("20, 40"));
+
+    REQUIRE_THAT(  //
+        in
+            | dux::reduce(
+                std::string{},
+                dux::filter([](int x) { return x % 2 == 0; })       //
+                    | dux::transform([](int x) { return 10 * x; })  //
+                    | dux::transform(str)                           //
+                    | dux::take(2)                                  //
+                    | delimit{ ", " }),
+        matchers::equal_to("20, 40"));
 }
 
 TEST_CASE("fork", "[transducers]")
